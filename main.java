@@ -11,6 +11,11 @@ class main {
         
     }
 
+    /**
+     * 
+     * 
+     * @return whether the user is able to log in with their username and password
+     */
     private static boolean try_to_log() {
         System.out.print("Enter your username: ");
         String username = sc.next();
