@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import Model.*;
 
 class Controller {
     static Scanner sc;
@@ -10,56 +11,40 @@ class Controller {
         System.out.println("4. Delete Playist");
     }
 
-    private static boolean create_account() {
-        String username;
+    private static String ask(String var_name) {
+`       String var;
         while (true) {
-            System.out.println("Username: ");
-            username = sc.next();
-            if (!username.isEmpty()) {
+            System.out.println(var_name + ": ");
+            var = sc.next();
+            if (!var.isEmpty()) {
                 break;
             } else {
-                System.out.println("Username cannot be empty. Try again.");
+                System.out.println(var_name + " cannot be empty. Try again.");
             }
         }
-        String password;
-        while (true) {
-            System.out.println("Password: ");
-            password = sc.next();
-            if (!password.isEmpty()) {
-                break;
-            } else {
-                System.out.println("Password cannot be empty. Try again.");
-            }
-        }
+        return var;
+    }
+
+    private static Song ask_for_song() {
+        String title = ask("Title");
+        String author = ask("Author");
         
-        // TODO: try to put current account information in database
-        
+        return song;
+    }
+
+    private static boolean ask_for_account() {
+        String first_name = ask("First Name");
+        String last_name = ask("Last Name");
+        String username = ask("Username");
+        String password = ask("Password");
+        String email = ask("Email");
+        User user = new User(first_name, last_name, username, password, email);
         return true;
     }
 
     private static boolean try_to_log() {
-        String username;
-        while (true) {
-            System.out.println("Username: ");
-            username = sc.next();
-            if (!username.isEmpty()) {
-                break;
-            } else {
-                System.out.println("Username cannot be empty. Try again.");
-            }
-        }
-        String password;
-        while (true) {
-            System.out.println("Password: ");
-            password = sc.next();
-            if (!password.isEmpty()) {
-                break;
-            } else {
-                System.out.println("Password cannot be empty. Try again.");
-            }
-        }
-
-        // TODO: Check our current JSON DB whether current account exist
+        String username = ask("Username");
+        String password = ask("Password");
         return true;
     }
 
@@ -76,7 +61,7 @@ class Controller {
                 logged = try_to_log();
                 break;
             case "R":
-                create_account();
+                ask_for_account()();
                 break;
             default:
                 System.out.println("Invalid. Only choose either L(ogin) or R(egister).");
