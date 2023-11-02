@@ -24,24 +24,61 @@ play songs, simply mark them as played
  * 
  */
 public class User {
+    private static int uid = 1;
+    private int user_id;
     private String username;
     private String password;
+    private String first_name;
+    private String last_name;
+    private String email;
+    // TODO: add "last access date" and "creation date"
 
-    public User(String username, String password){
-        this.username = username;
-        this.password = password;
+    public User(
+        String un, String pw, String fn, String ln, String em, int id
+    ) {
+        set_username(un);
+        set_password(pw);
+        set_first_name(fn);
+        set_last_name(ln);
+        set_email(em);
+        set_id(id);
+        // NOTES: we can set "last access date" every time this was called
+    }
+    
+    public User(
+        String un, String pw, String fn, String ln, String em
+        ) {
+        this.User(un, pw, fn, ln, em, get_id()); // DEBUG: not sure why there's error in this line
+        // NOTES: we can set "creation date" every time this was called
     }
 
+
+    private int get_id() {
+        return uid++;
+    }
     public String get_username() {
         return username;
     }
     public String get_password() {
         return password;
     }
+
     private void set_username(String username) {
         this.username = username;
     }
     private void set_password(String password) {
         this.password = password;
+    }
+    private void set_first_name(String first_name) {
+        this.first_name = first_name;
+    }
+    private void set_last_name(String last_name) {
+        this.last_name = last_name;
+    }
+    private void set_email(String email) {
+        this.email = email;
+    }
+    private void set_id(int id) {
+        this.user_id = id;
     }
 }
