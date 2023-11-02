@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-class main {
+class Controller {
     static Scanner sc;
 
     private static void print_help() {
