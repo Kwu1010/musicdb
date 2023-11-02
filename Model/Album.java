@@ -19,21 +19,16 @@ public class Album {
         return sb.toString();
     }
 
-    public Album(
-        String an, String rd, int id
-    ) {
+    public Album(String an, String rd, int id) {
         set_id(id);
         set_albumname(an);
         set_releasedate(rd);
     }
 
-     public Album(
-        String an, String rd
-    ) {
+     public Album(String an, String rd) {
         this(an, rd, -1);
         int id = get_new_id();
         set_id(id);
-        // NOTES: we can set "creation date" every time this was called
     }
 
     private int get_new_id() {
