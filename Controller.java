@@ -18,7 +18,7 @@ class Controller {
     }
 
     private static String ask(String var_name) {
-`       String var;
+       String var;
         while (true) {
             System.out.println(var_name + ": ");
             var = sc.next();
