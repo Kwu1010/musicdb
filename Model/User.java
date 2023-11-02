@@ -33,6 +33,22 @@ public class User {
     private String email;
     // TODO: add "last access date" and "creation date"
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("[");
+        sb.append(user_id + ", ");
+        sb.append(username + ", ");
+        sb.append(password + ", ");
+        sb.append(first_name + ", ");
+        sb.append(last_name + ", ");
+        sb.append(email);
+        sb.append("]");
+
+        return sb.toString();
+    }
+
     public User(
         String un, String pw, String fn, String ln, String em, int id
     ) {
@@ -47,20 +63,35 @@ public class User {
     
     public User(
         String un, String pw, String fn, String ln, String em
-        ) {
-        this.User(un, pw, fn, ln, em, get_id()); // DEBUG: not sure why there's error in this line
+    ) {
+        this(un, pw, fn, ln, em, -1);
+        int id = get_new_id();
+        set_id(id);
         // NOTES: we can set "creation date" every time this was called
     }
 
 
-    private int get_id() {
+    private int get_new_id() {
         return uid++;
+    }
+
+    public int get_id() {
+        return user_id;
     }
     public String get_username() {
         return username;
     }
     public String get_password() {
         return password;
+    }
+    public String get_first_name() {
+        return first_name;
+    }
+    public String get_last_name() {
+        return last_name;
+    }
+    public String get_email() {
+        return email;
     }
 
     private void set_username(String username) {
