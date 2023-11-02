@@ -4,17 +4,58 @@ public class Song {
     private static int sid = 1;
     private int song_id;
     private String title;
+    private String artist;
     private int length;
 
-    public Song(
-        String title, int length, int id
-    ) {
-        
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        sb.append(title + ", ");
+        sb.append(artist + ", ");
+        sb.append(length + ", ");
+        sb.append("]");
+        return sb.toString();
     }
 
     public Song(
-        String title, int length
+        String title, String artist, int length, int id
     ) {
-        this(title, length, 1);
+        set_title(title);
+        set_artist(artist);
+        set_length(length);
+        set_id(id);
+    }
+
+    public Song(
+        String title, String artist, int length
+    ) {
+        this(title, artist, length, 1);
+        int id = get_new_id();
+        set_id(id);
+    }
+    public int get_new_id(){
+        return sid++;
+    }
+    public int get_id(){
+        return song_id;
+    }
+    public String get_title(){
+        return title;
+    }
+    public String get_artist(){
+        return artist;
+    }
+    private void set_title(String title){
+        this.title = title;
+    }
+    private void set_artist(String artist){
+        this.artist = artist;
+    }
+    private void set_length(int length){
+        this.length = length;
+    }
+    private void set_id(int id){
+        this.song_id = id;
     }
 }
