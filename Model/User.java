@@ -23,14 +23,25 @@ play songs, simply mark them as played
 • The application must also allow an user to unfollow a another user
  * 
  */
-public class user {
+public class User {
     private String username;
     private String password;
 
-    public user(String username, String password){
+    public User(String username, String password){
         this.username = username;
         this.password = password;
     }
+
+    public String get_username() {
+        return username;
+    }
+    public String get_password() {
+        return password;
+    }
+    private void set_username(String username) {
+        this.username = username;
+    }
+    private void set_password(String password) {
+        this.password = password;
+    }
 }
-
-

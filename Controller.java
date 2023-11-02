@@ -7,20 +7,52 @@ class Controller {
         System.out.println("");
     }
 
-    private static void create_account(){
+    private static boolean create_account() {
+        String username;
+        while (true) {
+            System.out.println("Username: ");
+            username = sc.next();
+            if (!username.isEmpty()) {
+                break;
+            } else {
+                System.out.println("Username cannot be empty. Try again.");
+            }
+        }
+        String password;
+        while (true) {
+            System.out.println("Password: ");
+            password = sc.next();
+            if (!password.isEmpty()) {
+                break;
+            } else {
+                System.out.println("Password cannot be empty. Try again.");
+            }
+        }
         
+        return true;
     }
 
-    /**
-     * 
-     * 
-     * @return whether the user is able to log in with their username and password
-     */
     private static boolean try_to_log() {
-        System.out.print("Enter your username: ");
-        String username = sc.next();
-        System.out.print("Enter your password: ");
-        String password = sc.next();
+        String username;
+        while (true) {
+            System.out.println("Username: ");
+            username = sc.next();
+            if (!username.isEmpty()) {
+                break;
+            } else {
+                System.out.println("Username cannot be empty. Try again.");
+            }
+        }
+        String password;
+        while (true) {
+            System.out.println("Password: ");
+            password = sc.next();
+            if (!password.isEmpty()) {
+                break;
+            } else {
+                System.out.println("Password cannot be empty. Try again.");
+            }
+        }
         return true;
     }
 
