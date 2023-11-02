@@ -4,7 +4,10 @@ class Controller {
     static Scanner sc;
 
     private static void print_help() {
-        System.out.println("");
+        System.out.println("1. Add Music");
+        System.out.println("2. Delete Music");
+        System.out.println("3. Add Playlist");
+        System.out.println("4. Delete Playist");
     }
 
     private static boolean create_account() {
@@ -28,6 +31,8 @@ class Controller {
                 System.out.println("Password cannot be empty. Try again.");
             }
         }
+        
+        // TODO: try to put current account information in database
         
         return true;
     }
@@ -53,6 +58,8 @@ class Controller {
                 System.out.println("Password cannot be empty. Try again.");
             }
         }
+
+        // TODO: Check our current JSON DB whether current account exist
         return true;
     }
 
