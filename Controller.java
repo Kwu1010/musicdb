@@ -18,7 +18,7 @@ class Controller {
     }
 
     private static String ask(String var_name) {
-       String var;
+        String var;
         while (true) {
             System.out.println(var_name + ": ");
             var = sc.next();
@@ -34,7 +34,7 @@ class Controller {
     private static Song ask_for_song() {
         String title = ask("Title");
         String author = ask("Author");
-        
+        Song song = new Song(title, 0);
         return song;
     }
 
@@ -67,7 +67,7 @@ class Controller {
                 logged = try_to_log();
                 break;
             case "R":
-                ask_for_account()();
+                ask_for_account();
                 break;
             default:
                 System.out.println("Invalid. Only choose either L(ogin) or R(egister).");
