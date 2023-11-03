@@ -379,13 +379,13 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean follow(User user) {
+    public static boolean follow(User user, User follower) {
         int uid = user.get_id();
-        int idk = 0;
+        int fid = follower.get_id();
 
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO followers (follower_id, followee_id) VALUES (" + uid + ", ");
-        sb.append(idk + ");");
+        sb.append(fid + ");");
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
@@ -416,13 +416,13 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean unfollow(User user) {
+    public static boolean unfollow(User user, User follower) {
         int uid = user.get_id();
-        int idk = 0;
+        int fid = follower.get_id();
 
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM followers WHERE follower_id = " + uid + " AND followee_id = ");
-        sb.append(idk + ";");
+        sb.append(fid + ";");
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
