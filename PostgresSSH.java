@@ -23,6 +23,7 @@ public class PostgresSSH {
         credentials = new Scanner(credentialsFile);
         String user = credentials.nextLine(); // store username in first line of Credentials
         String password = credentials.nextLine(); // store password in second line of Credentials
+        credentials.close();
         conn = null;
         session = null;
 
