@@ -1,4 +1,6 @@
 package Model;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 /**
  * Users will be able to create new accounts and access via login. The system must record
 the date and time an account is created. It must also stored the date and time an user
@@ -31,6 +33,9 @@ public class User {
     private String first_name;
     private String last_name;
     private String email;
+    private String creation_date;
+    private String last_access_date;
+
     // TODO: add "last access date" and "creation date"
 
     @Override
@@ -58,6 +63,7 @@ public class User {
         set_last_name(ln);
         set_email(em);
         set_id(id);
+        set_last_access_date();
         // NOTES: we can set "last access date" every time this was called
     }
     
@@ -67,6 +73,7 @@ public class User {
         this(un, pw, fn, ln, em, -1);
         int id = get_new_id();
         set_id(id);
+        set_creation_date();
         // NOTES: we can set "creation date" every time this was called
     }
 
@@ -74,7 +81,6 @@ public class User {
     private int get_new_id() {
         return uid++;
     }
-
     public int get_id() {
         return user_id;
     }
@@ -93,7 +99,12 @@ public class User {
     public String get_email() {
         return email;
     }
-
+    public String get_creation_date(){
+        return creation_date;
+    }
+    public String get_last_access_date(){
+        return last_access_date;
+    }
     private void set_username(String username) {
         this.username = username;
     }
@@ -111,5 +122,17 @@ public class User {
     }
     private void set_id(int id) {
         this.user_id = id;
+    }
+    private String set_date(){
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        return formatter.format(date);
+    }
+    private void set_creation_date(){
+        this.creation_date = set_date();
+    }
+
+    private void set_last_access_date(){
+        this.last_access_date = set_date();
     }
 }
