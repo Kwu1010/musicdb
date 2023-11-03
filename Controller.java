@@ -54,7 +54,7 @@ class Controller {
     private static User try_to_log() {
         String username = ask("Username");
         String password = ask("Password");
-        User user = new User(username, password, "TEMP", "TEMP", "TEMP", 1);
+        User user = new User(username, password, "TEMP", "TEMP", "TEMP", 1, "TEMP");
         return user;
     }
 
@@ -63,15 +63,21 @@ class Controller {
         PostgresSSH.connect_to_database();
 
         boolean logged = false;
-        User user;
+        User user = null;
         outer: while (!logged) {
             System.out.println("Login/Register/Quit (L/R/Q): ");
             String op = sc.next();
+            System.out.println("");
 
             switch (op) {
             case "L":
                 user = try_to_log();
-                logged = PostgresSSH.findUser(user);
+                user = PostgresSSH.findUser(user);
+                if (user == null) {
+                    System.out.println("Invalid Username/Password. Please try again.\n");
+                } else {
+                    logged = true;
+                }
                 break;
             case "R":
                 user = register_user();
@@ -80,11 +86,12 @@ class Controller {
             case "Q":
                 break outer;
             default:
-                System.out.println("Invalid. Only choose either L(ogin) or R(egister).");
+                System.out.println("Invalid. Only choose either L(ogin) or R(egister) or Q(uit).\n");
             }
         }
         
         if (logged) {
+            System.out.println(user);
             boolean get_out = false;
             Song song;
             while (!get_out) {
