@@ -2,7 +2,6 @@ import com.jcraft.jsch.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.CookieHandler;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -73,7 +72,7 @@ public class PostgresSSH {
         }
     }
 
-    public static boolean exist(String username) {
+    private static boolean exist(String username) {
         String sql = String.format("""
             SELECT username FROM users
             WHERE username = '%s'
@@ -118,6 +117,7 @@ public class PostgresSSH {
             Statement stmt = conn.createStatement();
             stmt.executeQuery(sql);
         } catch (SQLException ex) {}
+
         return true;
     }
 
@@ -149,7 +149,6 @@ public class PostgresSSH {
     }
 
     public static boolean createCollection(Collection collection) {
-        int cid = collection.get_id();
         int uid = collection.get_userid();
         String name = collection.get_collectionname();
 
@@ -171,54 +170,42 @@ public class PostgresSSH {
     public static void listCollection(User user) {
         int uid = user.get_id();
 
-        String sb = String.format("""
-                    SELECT
-                        COLLECTIONS.COLLECTION_NAME AS "Collection Name",
-                        COUNT(COLLECTIONSONG.SONG_ID) AS "Number of Songs",
-                        COALESCE(SUM(SONGS.SONG_LENGTH), 0) / 60 AS "Total Duration (minutes)"
-                    FROM COLLECTIONS
-                    LEFT JOIN COLLECTIONSONG ON COLLECTIONS.COLLECTION_ID = COLLECTIONSONG.COLLECTION_ID
-                    LEFT JOIN SONGS ON COLLECTIONSONG.SONG_ID = SONGS.SONG_ID
-                    WHERE COLLECTIONS.USER_ID = %d
-                    GROUP BY COLLECTIONS.COLLECTION_NAME
-                    ORDER BY COLLECTIONS.COLLECTION_NAME ASC;
-                    """, uid);
+        String sql = String.format("""
+            SELECT
+                COLLECTION_NAME,
+                COUNT(COLLECTIONSONG.SONG_ID) AS number_of_songs,
+                COALESCE(SUM(SONGS.SONG_LENGTH), 0) / 60 AS total_duration
+            FROM COLLECTIONS
+            LEFT JOIN COLLECTIONSONG ON COLLECTIONS.COLLECTION_ID = COLLECTIONSONG.COLLECTION_ID
+            LEFT JOIN SONGS ON COLLECTIONSONG.SONG_ID = SONGS.SONG_ID
+            WHERE USER_ID = '%d'
+            GROUP BY COLLECTION_NAME
+            ORDER BY COLLECTION_NAME ASC;
+        """, uid);
         try{
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            String name = rs.getString("collection_name\n");
-            while (rs.next()){
-                name += "Number of Songs: " + rs.getString("number_of_songs") + "\n";
-                name += "Total Duration: " + rs.getString("total_duration") + "\n";
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                String name = rs.getString("collection_name");
+                System.out.println(name);
+                System.out.println("Number of Songs: " + rs.getString("number_of_songs"));
+                System.out.println("Total Duration: " + rs.getString("total_duration"));
+                System.out.println("");
             }
-            System.out.println(name);
-
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        // int uid = user.get_id();
-
-        // StringBuilder sb = new StringBuilder();
-        // sb.append("SELECT * FROM (SELECT collections.collection_name, COUNT(*) AS ");
-        // sb.append("number_of_songs, SUM(songs.song_length) AS total_duration FROM ");
-        // sb.append("collectionsong INNER JOIN collections ON ");
-        // sb.append("collectionsong.collection_id = collections.collection_id INNER ");
-        // sb.append("JOIN songs ON collectionsong.song_id = songs.song_id WHERE user_id = ");
-        // sb.append("" + uid + " GROUP BY collections.collection_id) AS subquery ");
-        // sb.append("ORDER BY subquery.collection_name ASC;");
-       
-        // collection.get_collection();
+        } catch (SQLException ex) {}
     }
 
     public static boolean searchSongName(Song song) {
         String sn = song.get_title();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT song_title FROM songs WHERE song_title = '");
-        sb.append(sb + "';");
+        String sql = String.format("""
+            SELECT song_title FROM songs
+            WHERE song_title = '%s'
+        """, song.get_title());
+
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
+            ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()){
                 return true;
             }
@@ -231,14 +218,16 @@ public class PostgresSSH {
     public static boolean searchSongArtist(Artist artist) {
         String singer = artist.get_artist();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT s.song_title FROM songartist AS r INNER JOIN songs ");
-        sb.append("AS s ON r.song_id = s.song_id INNER JOIN artists ON ");
-        sb.append("r.artist_id = artists.artist_id WHERE artist_name LIKE ");
-        sb.append("'" + singer + "';");
+        String sql = String.format("""
+            SELECT s.song_title FROM songartist 
+            AS r INNER JOIN songs
+            AS s ON r.song_id = s.song_id 
+            INNER JOIN artists ON r.artist_id = artists.artist_id 
+            WHERE artist_name LIKE '%s'
+        """, singer);
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
+            ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()){
                 return true;
             }
