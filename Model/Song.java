@@ -50,6 +50,11 @@ public class Song {
     public String get_artist() {
         return artist;
     }
+
+    private void set_id(int id) {
+        this.song_id = id;
+    }
+
     private void set_title(String title){
         this.title = title;
     }
