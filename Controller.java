@@ -33,8 +33,8 @@ class Controller {
 
     private static Song ask_for_song() {
         String title = ask("Title");
-        String author = ask("Author");
-        Song song = new Song(title, 0);
+        String author = ask("Artist");
+        // Song song = new Song(title, 0);
         return song;
     }
 
@@ -51,10 +51,11 @@ class Controller {
     private static boolean try_to_log() {
         String username = ask("Username");
         String password = ask("Password");
+        //create a user object and have a if statement here to check that the user exists. 
         return true;
     }
 
-    public static void main(String[] args) {
+        public static void main(String[] args) {
         sc = new Scanner(System.in);
 
         boolean logged = false;

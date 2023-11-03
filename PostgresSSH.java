@@ -9,21 +9,23 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class PostgresSSH {
+    private static final int lport = 5432;
+    private static final String rhost = "starbug.cs.rit.edu";
+    private static final String driverName = "org.postgresql.Driver";
+    private static final int rport = 5432;
+    private static final String databaseName = "p320_19"; //change to your database name
+    private static File credentialsFile = new File("Credentials");
+    private static Connection conn;
+    private static Scanner credentials;
+    private static Session session;
 
-    public static void main(String[] args) throws SQLException, FileNotFoundException {
-
-        int lport = 5432;
-        String rhost = "starbug.cs.rit.edu";
-        int rport = 5432;
-        File credentialsFile = new File("Credentials");
-        Scanner credentials = new Scanner(credentialsFile);
+    public static void connect_to_database() throws FileNotFoundException {
+        credentials = new Scanner(credentialsFile);
         String user = credentials.nextLine(); // store username in first line of Credentials
         String password = credentials.nextLine(); // store password in second line of Credentials
-        String databaseName = "p320_19"; //change to your database name
+        conn = null;
+        session = null;
 
-        String driverName = "org.postgresql.Driver";
-        Connection conn = null;
-        Session session = null;
         try {
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking", "no");
@@ -48,21 +50,19 @@ public class PostgresSSH {
             Class.forName(driverName);
             conn = DriverManager.getConnection(url, props);
             System.out.println("Database connection established");
-
-            // Do something with the database....
-
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (conn != null && !conn.isClosed()) {
-                System.out.println("Closing Database Connection");
-                conn.close();
-            }
-            if (session != null && session.isConnected()) {
-                System.out.println("Closing SSH Connection");
-                session.disconnect();
-            }
         }
     }
 
+    public static void close_connection() throws SQLException {
+        if (conn != null && !conn.isClosed()) {
+            System.out.println("Closing Database Connection");
+            conn.close();
+        }
+        if (session != null && session.isConnected()) {
+            System.out.println("Closing SSH Connection");
+            session.disconnect();
+        }
+    }
 }
