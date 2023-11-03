@@ -121,4 +121,15 @@ public class PostgresSSH {
         }
         return false;
     }
+
+    public static boolean createCollection(Collection collection) {
+        int cid = collection.get_id();
+        int uid = collection.get_userid();
+        String name = collection.get_collectionname();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO collections (collection_name, user_id) VALUES ");
+        sb.append("(<'" + name + "'>, <'" + uid + "'>)");
+    }
+
 }
