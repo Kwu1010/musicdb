@@ -1,10 +1,14 @@
 package Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Collection {
     private static int cid = 1;
     private int collection_id;
     private String collection_name;
     private int user_id;
+    private List<Song> allSongs;
 
     @Override
     public String toString() {
@@ -23,6 +27,7 @@ public class Collection {
         set_id(cid);
         set_uid(uid);
         set_collectionname(cn);
+        this.allSongs = new ArrayList<>();
     }
 
     public Collection(String cn, int uid) {
@@ -47,6 +52,17 @@ public class Collection {
         return collection_name;
     }
     
+    public void addSongToCollection(Song song) {
+        allSongs.add(song);
+    }
+
+    public void get_collection() {
+        System.out.println("Collection: " + collection_name);
+        for (Song song : allSongs) {
+            System.out.println(song.get_title() + " by " + song.get_artist());
+        }
+    }
+
     private void set_id(int id) {
         this.collection_id = id;
     }
