@@ -28,7 +28,7 @@ public class Genre {
         set_id(id);
     }
 
-    private int get_new_id() {
+    public int get_new_id() {
         return gid++;
     }
 
