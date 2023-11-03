@@ -73,7 +73,25 @@ public class PostgresSSH {
         }
     }
 
-    public static boolean addUser(User user){
+    public static boolean exist(String username) {
+        String sql = String.format("""
+            SELECT username FROM users
+            WHERE username = '%s'
+        """, username);
+
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException ex) {
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean addUser(User user) {
         String un = user.get_username();
         String pass = user.get_password();
         String fn = user.get_first_name();
@@ -82,40 +100,34 @@ public class PostgresSSH {
         String cd = user.get_creation_date();
         String lad = user.get_last_access_date();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO users (username, password, first_name, ");
-        sb.append("last_name, email, creation_date, last_access_date) VALUES (");
-        sb.append("'" + un + "', ");
-        sb.append("'" + pass + "', ");
-        sb.append("'" + fn + "', ");
-        sb.append("'" + ln + "' ,");
-        sb.append("'" + email + "', ");
-        sb.append("'" + cd + "', ");
-        sb.append("'" + lad + "');");
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeQuery(sb.toString());
-        } catch (SQLException ex) {
+        if (exist(un)) {
+            System.out.println("EXIST");
             return false;
         }
+
+        String sql = String.format("""
+            INSERT INTO
+                USERS (
+                    username, password, first_name, last_name, email, creation_date, last_access_date
+                ) VALUES (
+                    '%s', '%s', '%s', '%s', '%s', '%s', '%s'
+                )
+        """, un, pass, fn, ln, email, cd, lad);
+
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeQuery(sql);
+        } catch (SQLException ex) {}
         return true;
     }
 
-    public static User findUser(User user){
-        // int uid = user.get_id();
+    public static User findUser(User user) {
         String un = user.get_username();
         String pass = user.get_password();
-        // String lad = user.get_last_access_date();
         String sql = String.format("""
         SELECT * FROM users
         WHERE username = '%s' AND password = '%s'
         """, un, pass);
-        // sb.append("SELECT username, password FROM users WHERE username = ");
-        // sb.append("'" + un + "'" + " AND password = ");
-        // sb.append("'" + pass + "'" + "\n");
-        // sb.append("UPDATE users SET last_access_date = ");
-        // sb.append("'" + lad + "'" + " WHERE user_id = ");
-        // sb.append(uid + ";");
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
