@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+import java.sql.SQLException;
 import java.util.Scanner;
 import Model.*;
 
@@ -33,42 +35,44 @@ class Controller {
 
     private static Song ask_for_song() {
         String title = ask("Title");
-        String author = ask("Artist");
-        // Song song = new Song(title, 0);
+        String artist = ask("Artist");
+        Song song = new Song(title, artist, -1);
         return song;
     }
 
-    private static boolean ask_for_account() {
+    private static User register_user() {
         String first_name = ask("First Name");
         String last_name = ask("Last Name");
         String username = ask("Username");
         String password = ask("Password");
         String email = ask("Email");
-        User user = new User(first_name, last_name, username, password, email);
-        return true;
+        User user = new User(username, password, first_name, last_name, email);
+        return user;
     }
 
-    private static boolean try_to_log() {
+    private static User try_to_log() {
         String username = ask("Username");
         String password = ask("Password");
-        //create a user object and have a if statement here to check that the user exists. 
-        return true;
+        User user = new User(username, password, "TEMP", "TEMP", "TEMP", 1);
+        return user;
     }
 
-        public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, SQLException {
         sc = new Scanner(System.in);
+        PostgresSSH.connect_to_database();
 
         boolean logged = false;
+        User user;
         while (!logged) {
             System.out.println("Login/Register (L/R): ");
             String op = sc.next();
 
             switch (op) {
             case "L":
-                logged = try_to_log();
+                user = try_to_log();
                 break;
             case "R":
-                ask_for_account();
+                user = register_user();
                 break;
             default:
                 System.out.println("Invalid. Only choose either L(ogin) or R(egister).");
@@ -95,5 +99,6 @@ class Controller {
         }
 
         sc.close();
+        PostgresSSH.close_connection();
     }
 }
