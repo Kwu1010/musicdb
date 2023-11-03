@@ -143,7 +143,7 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean listCollection(User user) {
+    public static void listCollection(User user, Collection collection) {
         int uid = user.get_id();
 
         StringBuilder sb = new StringBuilder();
@@ -154,16 +154,8 @@ public class PostgresSSH {
         sb.append("JOIN songs ON collectionsong.song_id = songs.song_id WHERE user_id = ");
         sb.append("" + uid + " GROUP BY collections.collection_id) AS subquery ");
         sb.append("ORDER BY subquery.collection_name ASC;");
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()){
-                return true;
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return false;
+       
+        collection.get_collection();
     }
 
     public static boolean searchSongName(Song song) {
