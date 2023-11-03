@@ -90,12 +90,35 @@ public class PostgresSSH {
         sb.append("'" + email + "', ");
         sb.append("'" + cd + "', ");
         sb.append("'" + lad + "')");
-
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
         } catch (SQLException ex) {
             System.out.println(ex);
         }
+    }
+
+    public static boolean findUser(User user){
+        int uid = user.get_id();
+        String un = user.get_username();
+        String pass = user.get_password();
+        String lad = user.get_last_access_date();
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT user_id, username, FROM users WHERE username = <");
+        sb.append("'" + un + "'" + "> AND password = <");
+        sb.append("'" + pass + "'" + ">\n");
+        sb.append("UPDATE users SET last_access_date = <");
+        sb.append("'" + lad + "'" + "> WHERE user_id = <");
+        sb.append(uid + ">");
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb.toString());
+            if (rs.next()){
+                return true;
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
+        return false;
     }
 }
