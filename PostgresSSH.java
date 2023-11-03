@@ -6,6 +6,7 @@ import java.net.CookieHandler;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -100,28 +101,39 @@ public class PostgresSSH {
         return true;
     }
 
-    public static boolean findUser(User user){
-        int uid = user.get_id();
+    public static User findUser(User user){
+        // int uid = user.get_id();
         String un = user.get_username();
         String pass = user.get_password();
-        String lad = user.get_last_access_date();
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT user_id, username, FROM users WHERE username = ");
-        sb.append("'" + un + "'" + " AND password = ");
-        sb.append("'" + pass + "'" + "\n");
-        sb.append("UPDATE users SET last_access_date = ");
-        sb.append("'" + lad + "'" + " WHERE user_id = ");
-        sb.append(uid + ";");
+        // String lad = user.get_last_access_date();
+        String sql = String.format("""
+        SELECT * FROM users
+        WHERE username = '%s' AND password = '%s'
+        """, un, pass);
+        // sb.append("SELECT username, password FROM users WHERE username = ");
+        // sb.append("'" + un + "'" + " AND password = ");
+        // sb.append("'" + pass + "'" + "\n");
+        // sb.append("UPDATE users SET last_access_date = ");
+        // sb.append("'" + lad + "'" + " WHERE user_id = ");
+        // sb.append(uid + ";");
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()){
-                return true;
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                return new User(
+                    rs.getString("USERNAME"),
+                    rs.getString("PASSWORD"),
+                    rs.getString("FIRST_NAME"),
+                    rs.getString("LAST_NAME"),
+                    rs.getString("EMAIL"),
+                    rs.getInt("USER_ID"),
+                    rs.getString("CREATION_DATE")
+                );
             }
         } catch (SQLException ex) {
             System.out.println(ex);
         }
-        return false;
+        return null;
     }
 
     public static boolean createCollection(Collection collection) {
@@ -135,7 +147,7 @@ public class PostgresSSH {
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()){
+            if (rs.next()) {
                 return true;
             }
         } catch (SQLException ex) {
@@ -147,14 +159,41 @@ public class PostgresSSH {
     public static void listCollection(User user) {
         int uid = user.get_id();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT * FROM (SELECT collections.collection_name, COUNT(*) AS ");
-        sb.append("number_of_songs, SUM(songs.song_length) AS total_duration FROM ");
-        sb.append("collectionsong INNER JOIN collections ON ");
-        sb.append("collectionsong.collection_id = collections.collection_id INNER ");
-        sb.append("JOIN songs ON collectionsong.song_id = songs.song_id WHERE user_id = ");
-        sb.append("" + uid + " GROUP BY collections.collection_id) AS subquery ");
-        sb.append("ORDER BY subquery.collection_name ASC;");
+        String sb = String.format("""
+                    SELECT
+                        COLLECTIONS.COLLECTION_NAME AS "Collection Name",
+                        COUNT(COLLECTIONSONG.SONG_ID) AS "Number of Songs",
+                        COALESCE(SUM(SONGS.SONG_LENGTH), 0) / 60 AS "Total Duration (minutes)"
+                    FROM COLLECTIONS
+                    LEFT JOIN COLLECTIONSONG ON COLLECTIONS.COLLECTION_ID = COLLECTIONSONG.COLLECTION_ID
+                    LEFT JOIN SONGS ON COLLECTIONSONG.SONG_ID = SONGS.SONG_ID
+                    WHERE COLLECTIONS.USER_ID = %d
+                    GROUP BY COLLECTIONS.COLLECTION_NAME
+                    ORDER BY COLLECTIONS.COLLECTION_NAME ASC;
+                    """, uid);
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb.toString());
+            String name = rs.getString("collection_name\n");
+            while (rs.next()){
+                name += "Number of Songs: " + rs.getString("number_of_songs") + "\n";
+                name += "Total Duration: " + rs.getString("total_duration") + "\n";
+            }
+            System.out.println(name);
+
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
+        // int uid = user.get_id();
+
+        // StringBuilder sb = new StringBuilder();
+        // sb.append("SELECT * FROM (SELECT collections.collection_name, COUNT(*) AS ");
+        // sb.append("number_of_songs, SUM(songs.song_length) AS total_duration FROM ");
+        // sb.append("collectionsong INNER JOIN collections ON ");
+        // sb.append("collectionsong.collection_id = collections.collection_id INNER ");
+        // sb.append("JOIN songs ON collectionsong.song_id = songs.song_id WHERE user_id = ");
+        // sb.append("" + uid + " GROUP BY collections.collection_id) AS subquery ");
+        // sb.append("ORDER BY subquery.collection_name ASC;");
        
         // collection.get_collection();
     }
@@ -232,7 +271,7 @@ public class PostgresSSH {
                 return true;
             }
         } catch (SQLException ex) {
-            System.out.println(ex); 
+            System.out.println(ex);
         }
         return false;
     }
