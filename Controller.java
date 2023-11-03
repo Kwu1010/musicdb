@@ -8,6 +8,7 @@ class Controller {
 
     private static void print_help() {
         System.out.println("Actions avaliable:");
+        System.out.println("\t0. Exit Account");
         System.out.println("\t1. Add Song to Collection");
         System.out.println("\t2. Delete Song to Collection");
         System.out.println("\t3. Add Album to Collection");
@@ -70,6 +71,7 @@ class Controller {
             switch (op) {
             case "L":
                 user = try_to_log();
+                
                 break;
             case "R":
                 user = register_user();
@@ -80,22 +82,35 @@ class Controller {
         }
         
         boolean get_out = false;
+        Song song;
         while (!get_out) {
             print_help();
-
-            int op = sc.nextInt();
-
-            switch (op) {
-            case 0:
-                get_out = true;
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            default:
-                print_help();
+            
+            try {
+                int op = sc.nextInt();
+                switch (op) {
+                case 0:
+                    get_out = true;
+                    break;
+                case 1:
+                    song = ask_for_song();
+                    break;
+                case 2:
+                    song = ask_for_song();
+                    break;
+                case 3:
+                    album = ask_for_album();
+                    break;
+                case 4:
+                    album = ask_for_album();
+                    break;
+                default:
+                    System.out.println("No such operation. Please select your desired operation.");
+                }
+            } catch (Exception e) {
+                System.out.println("Please enter a number.");
             }
+
         }
 
         sc.close();
