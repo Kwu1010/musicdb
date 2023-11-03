@@ -37,7 +37,7 @@ class Controller {
     private static Song ask_for_song() {
         String title = ask("Title");
         String artist = ask("Artist");
-        Song song = new Song(title, artist, -1);
+        Song song = new Song(title, artist, -1, "-1");
         return song;
     }
 
@@ -64,54 +64,57 @@ class Controller {
 
         boolean logged = false;
         User user;
-        while (!logged) {
-            System.out.println("Login/Register (L/R): ");
+        outer: while (!logged) {
+            System.out.println("Login/Register/Quit (L/R/Q): ");
             String op = sc.next();
 
             switch (op) {
             case "L":
                 user = try_to_log();
-                logged = true;
+                logged = PostgresSSH.findUser(user);
                 break;
             case "R":
                 user = register_user();
                 PostgresSSH.addUser(user);
                 break;
+            case "Q":
+                break outer;
             default:
                 System.out.println("Invalid. Only choose either L(ogin) or R(egister).");
             }
         }
         
-        boolean get_out = false;
-        Song song;
-        while (!get_out) {
-            print_help();
-            
-            try {
-                int op = sc.nextInt();
-                switch (op) {
-                case 0:
-                    get_out = true;
-                    break;
-                case 1:
-                    song = ask_for_song();
-                    break;
-                case 2:
-                    song = ask_for_song();
-                    break;
-                // case 3:
-                //     album = ask_for_album();
-                //     break;
-                // case 4:
-                //     album = ask_for_album();
-                //     break;
-                default:
-                    System.out.println("No such operation. Please select your desired operation.");
+        if (logged) {
+            boolean get_out = false;
+            Song song;
+            while (!get_out) {
+                print_help();
+                
+                try {
+                    int op = sc.nextInt();
+                    switch (op) {
+                    case 0:
+                        get_out = true;
+                        break;
+                    case 1:
+                        song = ask_for_song();
+                        break;
+                    case 2:
+                        song = ask_for_song();
+                        break;
+                    // case 3:
+                    //     album = ask_for_album();
+                    //     break;                                           c                                                                                                         
+                    // case 4:
+                    //     album = ask_for_album();
+                    //     break;
+                    default:
+                        System.out.println("No such operation. Please select your desired operation.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Please enter a number.");
                 }
-            } catch (Exception e) {
-                System.out.println("Please enter a number.");
             }
-
         }
 
         sc.close();
