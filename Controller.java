@@ -81,7 +81,12 @@ class Controller {
                 break;
             case "R":
                 user = register_user();
-                PostgresSSH.addUser(user);
+                boolean success = PostgresSSH.addUser(user);
+                if (success) {
+                    System.out.println("Your account has been successfully created! Please go to the login page.\n");
+                } else {
+                    System.out.println("The creation of your account was unsuccessful. Please try again.\n");
+                }
                 break;
             case "Q":
                 break outer;
@@ -96,7 +101,6 @@ class Controller {
             Song song;
             while (!get_out) {
                 print_help();
-                
                 try {
                     int op = sc.nextInt();
                     switch (op) {
