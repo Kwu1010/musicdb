@@ -10,8 +10,6 @@ import java.sql.Statement;
 import java.util.Properties;
 import java.util.Scanner;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.RestoreAction;
-
 import Model.*;
 
 public class PostgresSSH {
@@ -81,6 +79,7 @@ public class PostgresSSH {
         String email = user.get_email();
         String cd = user.get_creation_date();
         String lad = user.get_last_access_date();
+
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO users (username, password, first_name,");
         sb.append("last_name, email, creation_date, last_access_date) VALUES (");
@@ -91,11 +90,12 @@ public class PostgresSSH {
         sb.append("'" + email + "', ");
         sb.append("'" + cd + "', ");
         sb.append("'" + lad + "')");
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
         } catch (SQLException ex) {
-            System.out.println("HEHEHE HAW!!");
+            System.out.println(ex);
         }
     }
 }

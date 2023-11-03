@@ -71,10 +71,11 @@ class Controller {
             switch (op) {
             case "L":
                 user = try_to_log();
-                
+                logged = true;
                 break;
             case "R":
                 user = register_user();
+                PostgresSSH.addUser(user);
                 break;
             default:
                 System.out.println("Invalid. Only choose either L(ogin) or R(egister).");
@@ -98,12 +99,12 @@ class Controller {
                 case 2:
                     song = ask_for_song();
                     break;
-                case 3:
-                    album = ask_for_album();
-                    break;
-                case 4:
-                    album = ask_for_album();
-                    break;
+                // case 3:
+                //     album = ask_for_album();
+                //     break;
+                // case 4:
+                //     album = ask_for_album();
+                //     break;
                 default:
                     System.out.println("No such operation. Please select your desired operation.");
                 }

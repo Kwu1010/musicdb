@@ -1,11 +1,13 @@
 package Model;
 
+import java.util.ArrayList;
+
 public class Album {
     private static int aid = 1;
     private int album_id;
     private String album_name;
     private String release_date;
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -25,7 +27,7 @@ public class Album {
         set_releasedate(rd);
     }
 
-     public Album(String an, String rd) {
+    public Album(String an, String rd) {
         this(an, rd, -1);
         int id = get_new_id();
         set_id(id);
