@@ -41,21 +41,21 @@ public class PostgresSSH {
             session.setConfig(config);
             session.setConfig("PreferredAuthentications","publickey,keyboard-interactive,password");
             session.connect();
-            System.out.println("Connected");
+            // System.out.println("Connected");
             int assigned_port = session.setPortForwardingL(lport, "127.0.0.1", rport);
-            System.out.println("Port Forwarded");
+            // System.out.println("Port Forwarded");
 
             // Assigned port could be different from 5432 but rarely happens
             String url = "jdbc:postgresql://127.0.0.1:"+ assigned_port + "/" + databaseName;
 
-            System.out.println("database Url: " + url);
+            // System.out.println("database Url: " + url);
             Properties props = new Properties();
             props.put("user", user);
             props.put("password", password);
 
             Class.forName(driverName);
             conn = DriverManager.getConnection(url, props);
-            System.out.println("Database connection established");
+            // System.out.println("Database connection established");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -63,16 +63,16 @@ public class PostgresSSH {
 
     public static void close_connection() throws SQLException {
         if (conn != null && !conn.isClosed()) {
-            System.out.println("Closing Database Connection");
+            // System.out.println("Closing Database Connection");
             conn.close();
         }
         if (session != null && session.isConnected()) {
-            System.out.println("Closing SSH Connection");
+            // System.out.println("Closing SSH Connection");
             session.disconnect();
         }
     }
 
-    public static void addUser(User user){
+    public static boolean addUser(User user){
         String un = user.get_username();
         String pass = user.get_password();
         String fn = user.get_first_name();
@@ -93,10 +93,11 @@ public class PostgresSSH {
         sb.append("'" + lad + "');");
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
+            stmt.executeQuery(sb.toString());
         } catch (SQLException ex) {
-            System.out.println(ex);
+            return false;
         }
+        return true;
     }
 
     public static boolean findUser(User user){
@@ -143,7 +144,7 @@ public class PostgresSSH {
         return false;
     }
 
-    public static void listCollection(User user, Collection collection) {
+    public static void listCollection(User user) {
         int uid = user.get_id();
 
         StringBuilder sb = new StringBuilder();
@@ -155,7 +156,7 @@ public class PostgresSSH {
         sb.append("" + uid + " GROUP BY collections.collection_id) AS subquery ");
         sb.append("ORDER BY subquery.collection_name ASC;");
        
-        collection.get_collection();
+        // collection.get_collection();
     }
 
     public static boolean searchSongName(Song song) {
@@ -231,7 +232,7 @@ public class PostgresSSH {
                 return true;
             }
         } catch (SQLException ex) {
-            System.out.println(ex);
+            System.out.println(ex); 
         }
         return false;
     }
