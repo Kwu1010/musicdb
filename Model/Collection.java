@@ -9,6 +9,7 @@ public class Collection {
     private String collection_name;
     private int user_id;
     private List<Song> allSongs;
+    private int duration;
 
     @Override
     public String toString() {
@@ -27,6 +28,7 @@ public class Collection {
         set_id(cid);
         set_uid(uid);
         set_collectionname(cn);
+        this.duration = 0;
         this.allSongs = new ArrayList<>();
     }
 
@@ -54,6 +56,11 @@ public class Collection {
     
     public void addSongToCollection(Song song) {
         allSongs.add(song);
+        duration += song.get_length();
+    }
+
+    public int get_duration() {
+        return duration;
     }
 
     public void get_collection() {

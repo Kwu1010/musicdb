@@ -51,6 +51,14 @@ public class Song {
         return artist;
     }
 
+    public String get_releasedate() {
+        return release_date;
+    }
+
+    public int get_length() {
+        return length;
+    }
+
     private void set_id(int id) {
         this.song_id = id;
     }
