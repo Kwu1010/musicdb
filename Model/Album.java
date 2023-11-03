@@ -1,7 +1,5 @@
 package Model;
 
-import java.util.ArrayList;
-
 public class Album {
     private static int aid = 1;
     private int album_id;
@@ -33,7 +31,7 @@ public class Album {
         set_id(id);
     }
 
-    private int get_new_id() {
+    public int get_new_id() {
         return aid++;
     }
 
@@ -53,11 +51,11 @@ public class Album {
         this.album_id = id;
     }
 
-    public void set_albumname(String name) {
+    private void set_albumname(String name) {
         this.album_name = name;
     }
 
-    public void set_releasedate(String date) {
+    private void set_releasedate(String date) {
         this.release_date = date;
-    }   
+    }
 }
