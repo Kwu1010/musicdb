@@ -42,6 +42,10 @@ TrackVerse is the ultimate solution for music lovers, offering a command line in
 # Usage
 TrackVerse offers a straightforward and interactive command line interface that guides you through the process of managing your music collections seamlessly. 
 
+Compile and Run by using the following command:
+- make
+- make run
+
 Follow these simple steps to make the most of TrackVerse:
 1. Login or Register: When you launch the application, you will be prompted to either log in if you have an existing account or register a new one. Simply follow the prompts and provide the necessary information to get started.
 2. Explore the Features: Once you've logged in, you will have access to a range of features, as described in the application's description. These features include creating and managing music collections, searching for songs, and connecting with other users.
