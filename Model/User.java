@@ -55,7 +55,7 @@ public class User {
     }
 
     public User(
-        String un, String pw, String fn, String ln, String em, int id
+        String un, String pw, String fn, String ln, String em, int id, String cd
     ) {
         set_username(un);
         set_password(pw);
@@ -64,13 +64,14 @@ public class User {
         set_email(em);
         set_id(id);
         set_last_access_date();
+        this.creation_date = cd;
         // NOTES: we can set "last access date" every time this was called
     }
     
     public User(
         String un, String pw, String fn, String ln, String em
     ) {
-        this(un, pw, fn, ln, em, -1);
+        this(un, pw, fn, ln, em, -1, "");
         int id = get_new_id();
         set_id(id);
         set_creation_date();
