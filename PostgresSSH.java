@@ -72,6 +72,17 @@ public class PostgresSSH {
         }
     }
 
+    private static void debug(ResultSet rs) throws SQLException {
+        ResultSetMetaData rsMetaData = rs.getMetaData();
+        System.out.println("List of column names in the current table: ");
+        //Retrieving the list of column names
+        int count = rsMetaData.getColumnCount();
+        for(int i = 1; i<=count; i++) {
+            System.out.println(rsMetaData.getColumnName(i));
+        }
+    }
+
+    // APPROVED
     private static boolean exist(String username) {
         String sql = String.format("""
             SELECT username FROM users
@@ -90,6 +101,7 @@ public class PostgresSSH {
         return false;
     }
 
+    // APPROVED
     public static boolean addUser(User user) {
         String un = user.get_username();
         String pass = user.get_password();
@@ -121,6 +133,7 @@ public class PostgresSSH {
         return true;
     }
 
+    // APPROVED
     public static User findUser(User user) {
         String un = user.get_username();
         String pass = user.get_password();
@@ -148,16 +161,20 @@ public class PostgresSSH {
         return null;
     }
 
+    // APPROVED
     public static boolean createCollection(Collection collection) {
         int uid = collection.get_userid();
         String name = collection.get_collectionname();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO collections (collection_name, user_id) VALUES ");
-        sb.append("('" + name + "', " + uid + ");");
+        String sql = String.format("""
+            INSERT INTO 
+                COLLECTIONS (collection_name, user_id)
+                VALUES ('%s', '%s')
+        """, name, uid);
+
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
+            ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 return true;
             }
@@ -167,6 +184,7 @@ public class PostgresSSH {
         return false;
     }
 
+    // APPROVED
     public static void listCollection(User user) {
         int uid = user.get_id();
 
@@ -195,19 +213,36 @@ public class PostgresSSH {
         } catch (SQLException ex) {}
     }
 
+    // APPROVED
     public static boolean searchSongName(Song song) {
         String sn = song.get_title();
 
         String sql = String.format("""
-            SELECT song_title FROM songs
-            WHERE song_title = '%s'
-        """, song.get_title());
+            SELECT 
+                SONGS.SONG_TITLE,
+                ARTISTS.ARTIST_NAME as "artist_name",
+                ALBUMS.ALBUM_NAME,
+                SONGS.SONG_LENGTH,
+                SONGS.RELEASE_DATE
+            FROM SONGS
+            JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
+            JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
+            JOIN SONGALBUM ON SONGS.SONG_ID = SONGALBUM.SONG_ID
+            JOIN ALBUMS ON SONGALBUM.ALBUM_ID = ALBUMS.ALBUM_ID
+            WHERE SONGS.SONG_TITLE = '%s'
+        """, sn);
 
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            if (rs.next()){
+            if (rs.next()) {
+                System.out.println("The song is sang by the following artists. Which one are you referring to: ");
+                do {
+                    System.out.println(rs.getString("artist_name"));
+                } while (rs.next());
                 return true;
+            } else {
+                System.out.println("The song does not exist.");
             }
         } catch (SQLException ex) {
             System.out.println(ex);
@@ -217,19 +252,32 @@ public class PostgresSSH {
 
     public static boolean searchSongArtist(Artist artist) {
         String singer = artist.get_artist();
-
         String sql = String.format("""
-            SELECT s.song_title FROM songartist 
-            AS r INNER JOIN songs
-            AS s ON r.song_id = s.song_id 
-            INNER JOIN artists ON r.artist_id = artists.artist_id 
-            WHERE artist_name LIKE '%s'
+            SELECT 
+                ARTISTS.ARTIST_NAME,
+                SONGS.SONG_TITLE as "song_title",
+                ALBUMS.ALBUM_NAME,
+                SONGS.SONG_LENGTH,
+                SONGS.RELEASE_DATE
+            FROM ARTISTS
+            JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
+            JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
+            JOIN SONGALBUM ON SONGS.SONG_ID = SONGALBUM.SONG_ID
+            JOIN ALBUMS ON SONGALBUM.ALBUM_ID = ALBUMS.ALBUM_ID
+            WHERE ARTISTS.ARTIST_NAME = '%s'
         """, singer);
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            if (rs.next()){
+            if (rs.next()) {
+                System.out.println("The song is sang by the following artists. Which one are you referring to: ");
+                do {
+                    System.out.println(rs.getString("song_title"));
+                } while (rs.next());
                 return true;
+            } else {
+                System.out.println("The song does not exist.");
             }
         } catch (SQLException ex) {
             System.out.println(ex);
@@ -240,34 +288,61 @@ public class PostgresSSH {
     public static boolean searchSongAlbum(Album album) {
         String name = album.get_albumname();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT s.song_title FROM songalbum AS a INNER JOIN songs ");
-        sb.append("AS s ON a.song_id = s.song_id INNER JOIN albums ON ");
-        sb.append("a.album_id = albums.album_id WHERE album_name LIKE ");
-        sb.append("'" + name + "';");
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()){
-                return true;
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return false;
+        String sql = String.format("""
+                    SELECT 
+                        ARTISTS.ARTIST_NAME,
+                        SONGS.SONG_TITLE as "song_title",
+                        ALBUMS.ALBUM_NAME,
+                        SONGS.SONG_LENGTH,
+                        SONGS.RELEASE_DATE
+                    FROM ALBUMS
+                    JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
+                    JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
+                    JOIN SONGALBUM ON SONGS.SONG_ID = SONGALBUM.SONG_ID
+                    JOIN ALBUMS ON SONGALBUM.ALBUM_ID = ALBUMS.ALBUM_ID
+                    WHERE ALBUMS.ALBUM_NAME = '%s'
+                """, name);
+
+                try {
+                    Statement stmt = conn.createStatement();
+                    ResultSet rs = stmt.executeQuery(sql);
+                    if (rs.next()) {
+                        System.out.println("The song is sang by the following artists. Which one are you referring to: ");
+                        do {
+                            System.out.println(rs.getString("song_title"));
+                        } while (rs.next());
+                        return true;
+                    } else {
+                        System.out.println("The song does not exist.");
+                    }
+                } catch (SQLException ex) {
+                    System.out.println(ex);
+                }
+                return false;
     }
 
     public static boolean searchSongGenre(Genre genre) {
         String type = genre.get_genre();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT s.song_title FROM songgenre AS g INNER JOIN songs ");
-        sb.append("AS s ON g.song_id = s.song_id INNER JOIN genres ON ");
-        sb.append("g.genre_id = genres.genre_id WHERE type LIKE ");
-        sb.append("'" + type + "';");
+        String sql = String.format("""
+            SELECT 
+                ARTISTS.ARTIST_NAME,
+                SONGS.SONG_TITLE as "song_title",
+                ALBUMS.ALBUM_NAME,
+                SONGS.SONG_LENGTH,
+                SONGS.RELEASE_DATE
+            FROM GENRES
+            JOIN SONGGENRE ON SONGGENRE.GENRE_ID = GENRES.GENRE_ID
+            JOIN SONGGENRE.SONG_ID = SONG.SONG_ID
+            JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
+            JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
+            JOIN SONGALBUM ON SONGS.SONG_ID = SONGALBUM.SONG_ID
+            JOIN ALBUMS ON SONGALBUM.ALBUM_ID = ALBUMS.ALBUM_ID
+            WHERE ALBUMS.ALBUM_NAME = '%s'
+        """, type);
+        
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
+            ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()){
                 return true;
             }
@@ -467,4 +542,4 @@ public class PostgresSSH {
         }
         return false;
     }
-}
+}                                                                                                                                                                             
