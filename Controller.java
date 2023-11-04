@@ -10,21 +10,22 @@ class Controller {
     private static void print_help() {
         System.out.println("Actions avaliable:");
         System.out.println("\t0. Exit Account");
-        System.out.println("\t1. Search Song by song name");
-        System.out.println("\t2. Search Song by artist name");
-        System.out.println("\t3. Search Song by album name");
-        System.out.println("\t4. Search Song by genre");
-        System.out.println("\t5. Add Song by song id to Collection");
-        System.out.println("\t6. View collections");
-        System.out.println("\t7. Create collection");
-        System.out.println("\t8. Delete Song from Collection");
-        // System.out.println("\t6. Add Album to Collection");
-        // System.out.println("\t7. Delete Album to Collection");
-        // System.out.println("\t8. Follow User");
-        // System.out.println("\t9. Unfollow User");
-        // System.out.println("\t10. View Collection Of Songs");
-        // System.out.println("\t11. Change name of Collection");
-        // System.out.println("\t12. Delete whole Collection");
+        System.out.println("\t1. Search song by song name");
+        System.out.println("\t2. Search song by artist name");
+        System.out.println("\t3. Search song by album name");
+        System.out.println("\t4. Search song by genre");
+        System.out.println("\t5. View collections");
+        System.out.println("\t6. Create collection");
+        System.out.println("\t7. Change name of Collection");
+        System.out.println("\t8. Delete whole Collection");
+        System.out.println("\t9. Add song to collection");
+        System.out.println("\t10. Delete song from collection");
+        System.out.println("\t11. Add album to collection");
+        System.out.println("\t12. Delete album from collection");
+        System.out.println("\t13. Listen to a song");
+        System.out.println("\t14. Search for another user");
+        System.out.println("\t15. Follow User");
+        System.out.println("\t16. Unfollow User");
     }
 
     private static String ask(String var_name) {
@@ -163,12 +164,7 @@ class Controller {
                         genre = ask_for_genre();
                         PostgresSSH.searchSongGenre(genre);
                         break;
-                    case 5: // add song into collection based on their IDs
-                        cid = Integer.parseInt(ask("collection id"));
-                        sid = Integer.parseInt(ask("song id"));
-                        PostgresSSH.insertSong(cid, sid, user.get_id());
-                        break;
-                    case 6: // look into collection based on ID
+                    case 5: // look into collection based on ID
                         PostgresSSH.listCollection(user);
                         cid = Integer.parseInt(ask("collection id"));
                         boolean isEmpty = !PostgresSSH.lookIntoCollectionSong(cid);
@@ -177,7 +173,7 @@ class Controller {
                             System.out.println("This collection is empty.");
                         }
                         break;
-                    case 7: // create collection
+                    case 6: // create collection
                         collection = ask_for_collection(user.get_id());
                         boolean success = PostgresSSH.createCollection(collection);
                         if (success) {
@@ -186,10 +182,31 @@ class Controller {
                             System.out.println("Collection is not created");
                         }
                         break;
-                    case 8: // delete song from collection based on their IDs
+                    case 7: // Change name of collection
+                        break;
+                    case 8: // Delete collection
+                        break;
+                    case 9: // Add song to collection
+                        cid = Integer.parseInt(ask("collection id"));
+                        sid = Integer.parseInt(ask("song id"));
+                        PostgresSSH.insertSong(cid, sid, user.get_id());
+                        break;
+                    case 10: // Delete song from collection
                         cid = Integer.parseInt(ask("collection id"));
                         sid = Integer.parseInt(ask("song id"));
                         PostgresSSH.deleteSong(cid, sid, user.get_id());
+                        break;
+                    case 11: // Add album to collection
+                        break;
+                    case 12: // Delte album from collection
+                        break;
+                    case 13: // Listen to a song
+                        break;
+                    case 14: // Search for another user
+                        break;
+                    case 15: // Follow user
+                        break;
+                    case 16: // Unfollow user
                         break;
                     default:
                         System.out.println("No such operation. Please select your desired operation.");
