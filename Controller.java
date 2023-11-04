@@ -136,7 +136,7 @@ class Controller {
             Album album;
             Genre genre;
             Collection collection;
-            int cid, id;
+            int cid, sid;
 
             while (!get_out) {
                 try {
@@ -165,8 +165,8 @@ class Controller {
                         break;
                     case 5: // add song into collection based on their IDs
                         cid = Integer.parseInt(ask("collection id"));
-                        id = Integer.parseInt(ask("song id"));
-                        PostgresSSH.insertSong(cid, id);
+                        sid = Integer.parseInt(ask("song id"));
+                        PostgresSSH.insertSong(cid, sid, user.get_id());
                         break;
                     case 6: // look into collection based on ID
                         PostgresSSH.listCollection(user);
@@ -188,8 +188,8 @@ class Controller {
                         break;
                     case 8: // delete song from collection based on their IDs
                         cid = Integer.parseInt(ask("collection id"));
-                        id = Integer.parseInt(ask("song id"));
-                        PostgresSSH.deleteSong(cid, id);
+                        sid = Integer.parseInt(ask("song id"));
+                        PostgresSSH.deleteSong(cid, sid, user.get_id());
                         break;
                     default:
                         System.out.println("No such operation. Please select your desired operation.");
