@@ -534,30 +534,43 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean follow(String email, int uid) {
-        // int uid = user.get_id();
-        // int fid = follower.get_id();
-        
-        String sb = String.format("""
-            SELECT 
-                USER_ID AS "FOLLOW_ID"
-            FROM USERS
-            WHERE USERS.EMAIL = %s
-            INSERT INTO FOLLOWERS (FOLLOWER_ID, FOLLOWEE_ID) VALUES
-            (%d, FOLLOW_ID)
-        """,email, uid);
+    // APPROVED
+    public static boolean follow(int follower, int followee) {
+        System.out.println(follower + " " + followee);
+        String sql = String.format("""
+            INSERT INTO FOLLOWERS (
+                FOLLOWER_ID, FOLLOWEE_ID
+            ) VALUES (
+                %d, %d
+            )
+        """, follower, followee);
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()){
-                return true;
+            stmt.executeQuery(sql);
+        } catch (SQLException ex) {}
+        return true;
+    }
+
+    // APPROVED
+    public static boolean follow(String email, int uid) {
+        String sql = String.format("""
+            SELECT
+                USERS.USER_ID as "uid"
+            FROM USERS 
+            WHERE USERS.EMAIL = '%s'
+        """, email);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                follow(uid, rs.getInt("uid"));
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+            return true;
+        } catch (SQLException ex) {}
         return false;
     }
 
+    // APPROVED
     public static boolean searchEmail(User user) {
         String email = user.get_email();
 
@@ -578,22 +591,18 @@ public class PostgresSSH {
         return false;
     }
 
+    // APPROVED
     public static boolean unfollow(String email, int uid) {
         String sb = String.format("""
             DELETE FROM followers
-            WHERE follower_id = (SELECT user_id FROM users WHERE email = '%s')
-            AND followed_id = %d;
-        """, email, uid);
+            WHERE follower_id = %d
+            AND followee_id = (SELECT user_id FROM users WHERE email = '%s');
+        """, uid, email);
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()) {
-                return true;
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return false;
+            stmt.executeQuery(sb.toString());
+        } catch (SQLException ex) {}
+        return true;
     }
 
     // APPROVED
