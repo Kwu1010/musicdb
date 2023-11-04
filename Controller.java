@@ -1,9 +1,6 @@
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.Scanner;
-import java.lang.Thread;
-
-import org.postgresql.osgi.PGDataSourceFactory;
 
 import Model.*;
 
@@ -13,14 +10,14 @@ class Controller {
     private static void print_help() {
         System.out.println("Actions avaliable:");
         System.out.println("\t0. Exit Account");
-        System.out.println("\t1. Search Song by song name to Collection");
-        System.out.println("\t2. Search Song by artist name to Collection");
-        System.out.println("\t3. Search Song by album name to Collection");
-        System.out.println("\t4. Search Song by genre to Collection");
+        System.out.println("\t1. Search Song by song name");
+        System.out.println("\t2. Search Song by artist name");
+        System.out.println("\t3. Search Song by album name");
+        System.out.println("\t4. Search Song by genre");
         System.out.println("\t5. Add Song by song id to Collection");
         System.out.println("\t6. View collections");
         System.out.println("\t7. Create collection");
-        // System.out.println("\t6. Delete Song from Collection");
+        System.out.println("\t8. Delete Song from Collection");
         // System.out.println("\t6. Add Album to Collection");
         // System.out.println("\t7. Delete Album to Collection");
         // System.out.println("\t8. Follow User");
@@ -32,7 +29,6 @@ class Controller {
 
     private static String ask(String var_name) {
         String var;
-        boolean first = true;
         while (true) {
             System.out.print(var_name + ": ");
             var = sc.nextLine();
@@ -75,7 +71,6 @@ class Controller {
         return collection;
     }
     
-
     private static User register_user() {
         String first_name = ask("First Name");
         String last_name = ask("Last Name");
@@ -134,46 +129,51 @@ class Controller {
         }
         
         if (logged) {
+            // PRE DEFINED VARIABLES
             boolean get_out = false;
             Song song;
             Artist artist;
             Album album;
             Genre genre;
             Collection collection;
+            int cid, id;
+
             while (!get_out) {
                 try {
                     print_help();
                     String s = ask("owo");
                     int op = Integer.parseInt(s);
                     switch (op) {
-                    case 0:
+                    case 0: // QUIT
                         get_out = true;
                         break;
-                    case 1:
+                    case 1: // search song by name
                         song = ask_for_song();
                         PostgresSSH.searchSongName(song);
                         break;
-                    case 2:
+                    case 2: // search song by artist
                         artist = ask_for_artist();
                         PostgresSSH.searchSongArtist(artist);
                         break;
-                    case 3:
+                    case 3: // search song by album
                         album = ask_for_album();
                         PostgresSSH.searchSongAlbum(album);
                         break;
-                    case 4:
+                    case 4: // search song by genre
                         genre = ask_for_genre();
                         PostgresSSH.searchSongGenre(genre);
                         break;
-                    case 5:
-                        collection = ask_for_collection(-1);
-                        int id = Integer.parseInt(ask("song id"));
-                        PostgresSSH.insertSong(collection, id);
+                    case 5: // add song into collection based on their IDs
+                        cid = Integer.parseInt(ask("collection id"));
+                        id = Integer.parseInt(ask("song id"));
+                        PostgresSSH.insertSong(cid, id);
                         break;
-                    case 6:
+                    case 6: // look into collection based on ID
                         PostgresSSH.listCollection(user);
+                        cid = Integer.parseInt(ask("collection id"));
+                        PostgresSSH.lookIntoCollection(cid);
                         break;
-                    case 7:
+                    case 7: // create collection
                         collection = ask_for_collection(user.get_id());
                         boolean success = PostgresSSH.createCollection(collection);
                         if (success) {
@@ -182,14 +182,11 @@ class Controller {
                             System.out.println("Collection is not created");
                         }
                         break;
-                    // case 6:
-                    //     collection = ask_for_collection();
-                    //     song = ask_for_song();
-                    //     PostgresSSH.deleteSong(collection, song);
-                    // case 7:
-                    //     collection = ask_for_collection();
-                    //     album = ask_for_album();
-                    //     PostgresSSH.deleteAlbum(collection, album);
+                    case 8: // delete song from collection based on their IDs
+                        cid = Integer.parseInt(ask("collection id"));
+                        id = Integer.parseInt(ask("song id"));
+                        PostgresSSH.deleteSong(cid, id);
+                        break;
                     default:
                         System.out.println("No such operation. Please select your desired operation.");
                     }
