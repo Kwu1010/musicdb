@@ -137,7 +137,8 @@ class Controller {
             Album album;
             Genre genre;
             Collection collection;
-            int cid, sid, aid;
+            int cid, sid, uid, aid;
+            String email;
             boolean success;
 
             while (!get_out) {
@@ -236,16 +237,23 @@ class Controller {
                         }
                         break;
                     case 14: // Search for another user
-                        String email = ask("Search for the email of the other user: ");
+                        email = ask("Search for the email of the other user: ");
                         success = PostgresSSH.searchEmail(email);
                         if (success) {
                             System.out.println("That user exist.");
                         } else {
                             System.out.println("That user doesn't exist.");
                         }
+                        break;
                     case 15: // Follow user
+                        email = ask("email");
+                        uid = user.get_id();
+                        PostgresSSH.follow(email, uid);
                         break;
                     case 16: // Unfollow user
+                        email = ask("email");
+                        uid = user.get_id();
+                        PostgresSSH.unfollow(email , uid);
                         break;
                     default:
                         System.out.println("No such operation. Please select your desired operation.");

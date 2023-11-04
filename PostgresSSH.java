@@ -534,18 +534,22 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean follow(User user, User follower) {
-        int uid = user.get_id();
-        int fid = follower.get_id();
-
+    public static boolean follow(String email, int uid) {
+        // int uid = user.get_id();
+        // int fid = follower.get_id();
+        
         String sb = String.format("""
-                    INSERT INTO FOLLOWERS (FOLLOWER_ID, FOLLOWEE_ID) VALUES
-                    (%d, %d)
-                """, uid, fid);
+            SELECT 
+                USER_ID AS "FOLLOW_ID"
+            FROM USERS
+            WHERE USERS.EMAIL = %s
+            INSERT INTO FOLLOWERS (FOLLOWER_ID, FOLLOWEE_ID) VALUES
+            (%d, FOLLOW_ID)
+        """,email, uid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()) {
+            if (rs.next()){
                 return true;
             }
         } catch (SQLException ex) {
@@ -554,15 +558,39 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean unfollow(User user, User follower) {
-        int uid = user.get_id();
-        int fid = follower.get_id();
+    public static boolean searchEmail(User user) {
+        String email = user.get_email();
 
         String sb = String.format("""
-                    DELETE
-                    FROM FOLLOWERS
-                    WHERE FOLLOWER_ID = %d AND FOLLOWEE_ID = %d
-                """, uid, fid);
+            SELECT user_id, username 
+            FROM users 
+            WHERE email = '%s'
+        """, email);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb.toString());
+            if (rs.next()){
+                return true;
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
+        return false;
+    }
+
+    public static boolean unfollow(String email, int uid) {
+        // int uid = user.get_id();
+        // int fid = follower.get_id();
+
+        String sb = String.format("""
+            SELECT 
+                USER_ID AS "FOLLOW_ID"
+            FROM USERS
+            WHERE USERS.EMAIL = %s
+            DELETE
+            FROM FOLLOWERS 
+            WHERE FOLLOWER_ID = %d AND FOLLOWEE_ID = FOLLOW_ID
+        """, email, uid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
