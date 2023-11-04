@@ -369,6 +369,7 @@ public class PostgresSSH {
         return true;
     }
 
+    // APPROVED
     public static boolean lookIntoCollectionSong(int cid) {
         String sb = String.format("""
             SELECT
@@ -397,6 +398,7 @@ public class PostgresSSH {
         return false;
     }
 
+    // APPROVED
     public static boolean lookIntoCollectionAlbum(int cid) {
         String sb = String.format("""
             SELECT
@@ -418,19 +420,21 @@ public class PostgresSSH {
                 System.out.println("");
                 return true;
             }
+            System.out.println("NOTHING");
         } catch (SQLException ex) {
             System.out.println(ex);
         }
         return false;
     }
 
+    // APPROVED
     public static boolean deleteSong(int cid, int sid, int uid) {
         String sql = String.format("""
             DELETE FROM collectionsong
             WHERE collection_id IN
                 (SELECT collection_id
                 FROM collections
-                WHERE collection_id = %d AND user_id = %d), %d)
+                WHERE collection_id = %d AND user_id = %d) AND SONG_ID = %d
         """, cid, uid, sid);
 
         try {   
@@ -448,6 +452,7 @@ public class PostgresSSH {
         return false;
     }
 
+    // APPROVED
     public static boolean insertAlbum(int cid, int aid, int uid) {
         String sb = String.format("""
             INSERT INTO collectionalbum (collection_id, album_id)
@@ -459,35 +464,27 @@ public class PostgresSSH {
 
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()){
-                return true;
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return false;
+            stmt.executeQuery(sb.toString());
+        } catch (SQLException ex) {}
+        return true;
     }
 
+    // APPROVED
     public static boolean deleteAlbum(int cid, int aid, int uid) {
         String sb = String.format("""
             DELETE FROM collectionalbum
-            WHERE collection_id IN
-                (SELECT collection_id
+            WHERE collection_id IN(
+                SELECT collection_id
                 FROM collections
-                WHERE collection_id = %d AND user_id = %d), %d)
+                WHERE collection_id = %d AND user_id = %d
+            ) AND ALBUM_ID = %d
         """, cid, uid, aid);
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()){
-                return true;
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+            stmt.executeQuery(sb.toString());
+        } catch (SQLException ex) {}
 
-        return false;
+        return true;
     }
 
     public static boolean updateCollectionName(Collection collection, int uid) {
