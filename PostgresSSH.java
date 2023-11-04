@@ -484,11 +484,10 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean updateCollectionName(Collection collection, User user) {
+    public static boolean updateCollectionName(Collection collection, int uid) {
         int cid = collection.get_id();
-        int uid = user.get_id();
         String name = collection.get_collectionname();
-        
+
         String sb = String.format("""
             UDPATE COLLECTIONS 
             SET COLLECTIONS.COLLECTION_NAME = '%s'
