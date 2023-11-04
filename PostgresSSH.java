@@ -369,11 +369,11 @@ public class PostgresSSH {
     public static boolean lookIntoCollectionSong(int cid) {
         String sb = String.format("""
             SELECT
-                SONG.SONG_TITLE AS "song_title"
+                SONGS.SONG_TITLE AS "song_title"
             FROM COLLECTIONS
-                JOIN COLLECTIONSONG ON COLLECTIONSONG.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
-                JOIN SONG ON SONG.SONG_ID = COLLECTIONSONG.SONG_ID
-            WHERE COLLECTION_ID = %d
+            JOIN COLLECTIONSONG ON COLLECTIONSONG.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
+            JOIN SONGS ON SONGS.SONG_ID = COLLECTIONSONG.SONG_ID
+            WHERE COLLECTIONS.COLLECTION_ID = %d
         """, cid);
         try {
             Statement stmt = conn.createStatement();
@@ -384,22 +384,21 @@ public class PostgresSSH {
                     //check whether it is a song or an album 
                     System.out.println(rs.getString("song_title"));
                 } while (rs.next());
+                System.out.println("");
                 return true;
-            } else {
-                System.out.println("This collection is empty");
             }
         } catch (SQLException ex) {}
-        return true;
+        return false;
     }
 
     public static boolean lookIntoCollectionAlbum(int cid) {
         String sb = String.format("""
             SELECT
-                ALBUM.ALBUM_NAME AS "album_name"
+                ALBUMS.ALBUM_NAME AS "album_name"
             FROM COLLECTIONS
                 JOIN COLLECTIONALBUM ON COLLECTIONALBUM.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
-                JOIN ALBUM ON ALBUM.ALBUM_ID = COLLECTIONALBUM.ALBUM_ID
-            WHERE COLLECTION_ID = %d
+                JOIN ALBUMS ON ALBUMS.ALBUM_ID = COLLECTIONALBUM.ALBUM_ID
+            WHERE COLLECTIONS.COLLECTION_ID = %d
         """, cid);
         try {
             Statement stmt = conn.createStatement();
@@ -409,26 +408,25 @@ public class PostgresSSH {
                 do {
                      rs.getString("album_name");
                 } while (rs.next());
+                System.out.println("");
                 return true;
-            } else {
-                System.out.println("This collection has no albums");
             }
-        } catch (SQLException ex) {}
-        return true;
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
+        return false;
     }
 
     public static boolean deleteSong(int cid, int sid) {
-
         String sql = String.format("""
-            DELETE 
+            DELETE
             FROM COLLECTIONSONG
-            WHERE COLLECTION_ID = %d
-            AND SONG_ID = %d
+            WHERE COLLECTION_ID = %d AND SONG_ID = %d
         """, cid, sid);
 
         try {   
-            Statement smh = conn.createStatement();
-            int rowsAffected = smh.executeUpdate(sql);
+            Statement stm = conn.createStatement();
+            int rowsAffected = stm.executeUpdate(sql);
             
             if (rowsAffected > 0) {
                 return true;
@@ -467,11 +465,12 @@ public class PostgresSSH {
 
 
         String sb = String.format("""
-                                DELETE
-                                FROM COLLECTIONALBUM
-                                WHERE COLLECTION_ID = %d
-                                AND ALBUM_ID = %d
-                                """, cid, aid);
+            DELETE
+            FROM COLLECTIONALBUM
+            WHERE COLLECTION_ID = %d
+            AND ALBUM_ID = %d
+        """, cid, aid);
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
@@ -481,6 +480,7 @@ public class PostgresSSH {
         } catch (SQLException ex) {
             System.out.println(ex);
         }
+
         return false;
     }
 
@@ -618,7 +618,7 @@ public class PostgresSSH {
                 UPDATE SONGS 
                 SET LISTEN_COUNT = LISTEN_COUNT + 1
                 WHERE SONG_ID = %d
-                """, sid);        
+                """, sid);
 
         try {
             Statement stmt = conn.createStatement();

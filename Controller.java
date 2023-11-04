@@ -171,7 +171,11 @@ class Controller {
                     case 6: // look into collection based on ID
                         PostgresSSH.listCollection(user);
                         cid = Integer.parseInt(ask("collection id"));
-                        PostgresSSH.lookIntoCollection(cid);
+                        boolean isEmpty = !PostgresSSH.lookIntoCollectionSong(cid);
+                        isEmpty = isEmpty || !PostgresSSH.lookIntoCollectionAlbum(cid);
+                        if (isEmpty) {
+                            System.out.println("This collection is empty.");
+                        }
                         break;
                     case 7: // create collection
                         collection = ask_for_collection(user.get_id());
