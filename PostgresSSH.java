@@ -422,8 +422,8 @@ public class PostgresSSH {
 
     public static boolean deleteSong(int cid, int sid, int uid) {
         String sql = String.format("""
-            DELETE FROM collectionsong (collection_id, song_id)
-            VALUES (
+            DELETE FROM collectionsong
+            WHERE collection_id IN
                 (SELECT collection_id
                 FROM collections
                 WHERE collection_id = %d AND user_id = %d), %d)
@@ -465,8 +465,8 @@ public class PostgresSSH {
 
     public static boolean deleteAlbum(int cid, int aid, int uid) {
         String sb = String.format("""
-            DELETE FROM collectionalbum (collection_id, album_id)
-            VALUES (
+            DELETE FROM collectionalbum
+            WHERE collection_id IN
                 (SELECT collection_id
                 FROM collections
                 WHERE collection_id = %d AND user_id = %d), %d)
