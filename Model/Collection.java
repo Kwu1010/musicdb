@@ -32,7 +32,7 @@ public class Collection {
     }
 
     public Collection(String cn, int uid) {
-        this(cn, uid, -1);
+        this(cn, -1, uid);
         int cid = get_new_id();
         set_id(cid);
     }
@@ -80,7 +80,7 @@ public class Collection {
     }
 
     private void set_uid(int id) {
-        this.collection_id = id;
+        this.user_id = id;
     }
 
     private void set_collectionname(String name) {
