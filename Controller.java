@@ -13,16 +13,21 @@ class Controller {
     private static void print_help() {
         System.out.println("Actions avaliable:");
         System.out.println("\t0. Exit Account");
-        System.out.println("\t1. Add Song by song name to Collection");
-        System.out.println("\t2. Add Song by artist name to Collection");
-        System.out.println("\t3. Delete Song to Collection");
-        System.out.println("\t4. Add Album to Collection");
-        System.out.println("\t5. Delete Album to Collection");
-        System.out.println("\t6. Follow User");
-        System.out.println("\t7. Unfollow User");
-        System.out.println("\t8. View Collection Of Songs");
-        System.out.println("\t9. Change name of Collection");
-        System.out.println("\t10. Delete whole Collection");
+        System.out.println("\t1. Search Song by song name to Collection");
+        System.out.println("\t2. Search Song by artist name to Collection");
+        System.out.println("\t3. Search Song by album name to Collection");
+        System.out.println("\t4. Search Song by genre to Collection");
+        System.out.println("\t5. Add Song by song id to Collection");
+        System.out.println("\t6. View collections");
+        System.out.println("\t7. Create collection");
+        // System.out.println("\t6. Delete Song from Collection");
+        // System.out.println("\t6. Add Album to Collection");
+        // System.out.println("\t7. Delete Album to Collection");
+        // System.out.println("\t8. Follow User");
+        // System.out.println("\t9. Unfollow User");
+        // System.out.println("\t10. View Collection Of Songs");
+        // System.out.println("\t11. Change name of Collection");
+        // System.out.println("\t12. Delete whole Collection");
     }
 
     private static String ask(String var_name) {
@@ -64,9 +69,9 @@ class Controller {
         return genre;
     }
 
-    private static Collection ask_for_collection(){
+    private static Collection ask_for_collection(int uid) {
         String name = ask("Collection");
-        Collection collection = new Collection(name, 0);
+        Collection collection = new Collection(name, uid);
         return collection;
     }
     
@@ -161,9 +166,22 @@ class Controller {
                         PostgresSSH.searchSongGenre(genre);
                         break;
                     case 5:
-                        collection = ask_for_collection();
-                        song = ask_for_song();
-                        PostgresSSH.insertSong(collection, song);
+                        collection = ask_for_collection(-1);
+                        int id = Integer.parseInt(ask("song id"));
+                        PostgresSSH.insertSong(collection, id);
+                        break;
+                    case 6:
+                        PostgresSSH.listCollection(user);
+                        break;
+                    case 7:
+                        collection = ask_for_collection(user.get_id());
+                        boolean success = PostgresSSH.createCollection(collection);
+                        if (success) {
+                            System.out.println("Collection has successfully been created!");
+                        } else {
+                            System.out.println("Collection is not created");
+                        }
+                        break;
                     // case 6:
                     //     collection = ask_for_collection();
                     //     song = ask_for_song();
