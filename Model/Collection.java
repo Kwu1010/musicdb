@@ -9,7 +9,7 @@ public class Collection {
     private String collection_name;
     private int user_id;
     private List<Song> allSongs;
-    private int duration;
+    private List<Album> allAlbums;
 
     @Override
     public String toString() {
@@ -28,12 +28,11 @@ public class Collection {
         set_id(cid);
         set_uid(uid);
         set_collectionname(cn);
-        this.duration = 0;
         this.allSongs = new ArrayList<>();
     }
 
     public Collection(String cn, int uid) {
-        this(cn, -1, uid);
+        this(cn, uid, -1);
         int cid = get_new_id();
         set_id(cid);
     }
@@ -56,17 +55,23 @@ public class Collection {
     
     public void addSongToCollection(Song song) {
         allSongs.add(song);
-        duration += song.get_length();
     }
 
-    public int get_duration() {
-        return duration;
+    public void addAlbumToCollection(Album album){
+        allAlbums.add(album);
     }
 
-    public void get_collection() {
+    public void get_collection_songs() {
         System.out.println("Collection: " + collection_name);
         for (Song song : allSongs) {
             System.out.println(song.get_title() + " by " + song.get_artist());
+        }
+    }
+
+    public void get_collection_albums(){
+        System.out.println("Collection: " + collection_name);
+        for (Album album : allAlbums){
+            System.out.println(album.get_albumname() + " ");
         }
     }
 
@@ -75,7 +80,7 @@ public class Collection {
     }
 
     private void set_uid(int id) {
-        this.user_id = id;
+        this.collection_id = id;
     }
 
     private void set_collectionname(String name) {
