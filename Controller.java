@@ -27,9 +27,10 @@ class Controller {
 
     private static String ask(String var_name) {
         String var;
+        boolean first = true;
         while (true) {
             System.out.print(var_name + ": ");
-            var = sc.next();
+            var = sc.nextLine();
             if (!var.isEmpty()) {
                 break;
             } else {
@@ -46,7 +47,7 @@ class Controller {
     }
 
     private static Artist ask_for_artist(){
-        String name = ask("Artist Name: ");
+        String name = ask("Artist Name");
         Artist artist = new Artist(name);
         return artist;
     }
@@ -94,8 +95,7 @@ class Controller {
         boolean logged = false;
         User user = null;
         outer: while (!logged) {
-            System.out.print("Login/Register/Quit (L/R/Q): ");
-            String op = sc.next();
+            String op = ask("Login/Register/Quit (L/R/Q)");
             System.out.println("");
 
             switch (op) {
@@ -103,7 +103,7 @@ class Controller {
                 user = try_to_log();
                 user = PostgresSSH.findUser(user);
                 if (user == null) {
-                    System.out.println("Invalid Username/Password. Please try again.\n");
+                    System.out.println("Invalid Username/Password. Please try again.");
                 } else {
                     logged = true;
                 }
@@ -112,19 +112,20 @@ class Controller {
                 user = register_user();
                 boolean success = PostgresSSH.addUser(user);
                 if (success) {
-                    System.out.println("Your account has been successfully created! Please go to the login page.\n");
+                    System.out.println("Your account has been successfully created! Please go to the login page.");
                     User cur = PostgresSSH.findUser(user);
                     Collection col = new Collection("Favorites", cur.get_id());
                     PostgresSSH.createCollection(col);
                 } else {
-                    System.out.println("The creation of your account was unsuccessful. Please try again.\n");
+                    System.out.println("The creation of your account was unsuccessful. Please try again.");
                 }
                 break;
             case "Q":
                 break outer;
             default:
-                System.out.println("Invalid. Only choose either L(ogin) or R(egister) or Q(uit).\n");
+                System.out.println("Invalid. Only choose either L(ogin) or R(egister) or Q(uit).");
             }
+            System.out.println("");
         }
         
         if (logged) {
@@ -137,8 +138,7 @@ class Controller {
             while (!get_out) {
                 try {
                     print_help();
-                    System.out.print("owo: ");
-                    String s = sc.next();
+                    String s = ask("owo");
                     int op = Integer.parseInt(s);
                     switch (op) {
                     case 0:
@@ -173,11 +173,12 @@ class Controller {
                     //     album = ask_for_album();
                     //     PostgresSSH.deleteAlbum(collection, album);
                     default:
-                        System.out.println("No such operation. Please select your desired operation.\n");
+                        System.out.println("No such operation. Please select your desired operation.");
                     }
                 } catch (Exception e) {
-                    System.out.println("Please enter a number.\n");
+                    System.out.println("Please enter a number.");
                 }
+                System.out.println("");
             }
         }
 
