@@ -165,7 +165,6 @@ public class PostgresSSH {
     public static boolean createCollection(Collection collection) {
         int uid = collection.get_userid();
         String name = collection.get_collectionname();
-        System.out.printf("%d %s\n", uid, name);
 
         String sql = String.format("""
             INSERT INTO 
@@ -175,12 +174,9 @@ public class PostgresSSH {
 
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            if (rs.next()) {
-                return true;
-            }
+            stmt.executeQuery(sql);
         } catch (SQLException ex) {}
-        return false;
+        return true;
     }
 
     // APPROVED
@@ -188,15 +184,8 @@ public class PostgresSSH {
         int uid = user.get_id();
 
         String sql = String.format("""
-            SELECT
-                COLLECTION_NAME,
-                COUNT(COLLECTIONSONG.SONG_ID) AS number_of_songs,
-                COALESCE(SUM(SONGS.SONG_LENGTH), 0) / 60 AS total_duration
-            FROM COLLECTIONS
-            LEFT JOIN COLLECTIONSONG ON COLLECTIONS.COLLECTION_ID = COLLECTIONSONG.COLLECTION_ID
-            LEFT JOIN SONGS ON COLLECTIONSONG.SONG_ID = SONGS.SONG_ID
+            SELECT * FROM COLLECTIONS
             WHERE USER_ID = '%d'
-            GROUP BY COLLECTION_NAME
             ORDER BY COLLECTION_NAME ASC;
         """, uid);
         try{
@@ -204,12 +193,11 @@ public class PostgresSSH {
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 String name = rs.getString("collection_name");
-                System.out.println(name);
-                System.out.println("Number of Songs: " + rs.getString("number_of_songs"));
-                System.out.println("Total Duration: " + rs.getString("total_duration"));
-                System.out.println("");
+                System.out.printf("%d: %s\n", rs.getInt("COLLECTION_ID"), name);
             }
-        } catch (SQLException ex) {}
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
     }
 
     // APPROVED
@@ -218,6 +206,7 @@ public class PostgresSSH {
 
         String sql = String.format("""
             SELECT 
+                SONGS.SONG_ID as "song_id,
                 SONGS.SONG_TITLE,
                 ARTISTS.ARTIST_NAME as "artist_name",
                 ALBUMS.ALBUM_NAME,
@@ -237,7 +226,7 @@ public class PostgresSSH {
             if (rs.next()) {
                 System.out.println("The song is sang by the following artists. Which one are you referring to: ");
                 do {
-                    System.out.println(rs.getString("artist_name"));
+                    System.out.println(rs.getString("song_id") + ", " + rs.getString("artist_name"));
                 } while (rs.next());
                 return true;
             } else {
@@ -251,9 +240,10 @@ public class PostgresSSH {
 
     // APPROVED
     public static boolean searchSongArtist(Artist artist) {
-        int aid = artist.get_id();
+        String aname = artist.get_artist();
         String sql = String.format("""
             SELECT 
+                SONGS.SONG_ID as "song_id",
                 ARTISTS.ARTIST_NAME,
                 SONGS.SONG_TITLE as "song_title",
                 ALBUMS.ALBUM_NAME,
@@ -264,8 +254,8 @@ public class PostgresSSH {
             JOIN SONGS ON SONGS.SONG_ID = SONGARTIST.SONG_ID
             JOIN ALBUMARTIST ON ALBUMARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
             JOIN ALBUMS ON ALBUMS.ALBUM_ID = ALBUMARTIST.ALBUM_ID
-            WHERE ARTISTS.ARTIST_ID  = %d
-        """, aid);
+            WHERE ARTISTS.ARTIST_NAME = '%s'
+        """, aname);
 
         try {
             Statement stmt = conn.createStatement();
@@ -273,7 +263,7 @@ public class PostgresSSH {
             if (rs.next()) {
                 System.out.println("The song is sang by the following artists. Which one are you referring to: ");
                 do {
-                    System.out.println(rs.getString("song_title"));
+                    System.out.println(rs.getString("song_id") + ", " + rs.getString("song_title"));
                 } while (rs.next());
                 return true;
             } else {
@@ -285,9 +275,9 @@ public class PostgresSSH {
         return false;
     }
 
-    
+    // APPROVED
     public static boolean searchSongAlbum(Album album) {
-        String name = album.get_albumname();
+        String aname = album.get_albumname();
 
         String sql = String.format("""
             SELECT 
@@ -297,24 +287,25 @@ public class PostgresSSH {
                 SONGS.SONG_LENGTH,
                 SONGS.RELEASE_DATE
             FROM ALBUMS
-            JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
-            JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
-            JOIN SONGALBUM ON SONGS.SONG_ID = SONGALBUM.SONG_ID
-            JOIN ALBUMS ON SONGALBUM.ALBUM_ID = ALBUMS.ALBUM_ID
+            JOIN ALBUMARTIST ON ALBUMARTIST.ALBUM_ID = ALBUMS.ALBUM_ID
+            JOIN ARTISTS ON ARTISTS.ARTIST_ID  = ALBUMARTIST.ARTIST_ID
+            
+            JOIN SONGALBUM ON SONGALBUM.ALBUM_ID  = ALBUMS.ALBUM_ID 
+            JOIN SONGS ON SONGS.SONG_ID  = SONGALBUM.SONG_ID
             WHERE ALBUMS.ALBUM_NAME = '%s'
-        """, name);
+        """, aname);
 
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
-                System.out.println("The song is sang by the following artists. Which one are you referring to: ");
+                System.out.println("The following song is in the album. Which one are you referring to: ");
                 do {
                     System.out.println(rs.getString("song_title"));
                 } while (rs.next());
                 return true;
             } else {
-                System.out.println("The song does not exist.");
+                System.out.println("The album does not exist.");
             }
         } catch (SQLException ex) {
             System.out.println(ex);
@@ -322,6 +313,7 @@ public class PostgresSSH {
         return false;
     }
 
+    // APPROVED
     public static boolean searchSongGenre(Genre genre) {
         String type = genre.get_genre();
         String sql = String.format("""
@@ -333,20 +325,25 @@ public class PostgresSSH {
                 SONGS.RELEASE_DATE
             FROM GENRES
             JOIN SONGGENRE ON SONGGENRE.GENRE_ID = GENRES.GENRE_ID
-            JOIN SONGGENRE ON SONGGENRE.SONG_ID = SONG.SONG_ID
-            JOIN SONG ON SONG.SONG_ID = SONGGENRE.SONG_ID
+            JOIN SONGS ON SONGS.SONG_ID = SONGGENRE.SONG_ID
             JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
             JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
-            JOIN SONGALBUM ON ARTISTS.ARTIST_ID = SONGALBUM.ARTIST_ID
+            JOIN SONGALBUM ON SONGS.SONG_ID = SONGALBUM.SONG_ID
             JOIN ALBUMS ON SONGALBUM.ALBUM_ID = ALBUMS.ALBUM_ID
-            WHERE ALBUMS.ALBUM_NAME = '%s'
+            WHERE GENRES.TYPE = '%s'
         """, type);
-        
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            if (rs.next()){
+            if (rs.next()) {
+                System.out.printf("The following songs are %s. Which one do you want to add: \n", type);
+                do {
+                    System.out.println(rs.getString("song_title"));
+                } while (rs.next());
                 return true;
+            } else {
+                System.out.println("The song does not exist.");
             }
         } catch (SQLException ex) {
             System.out.println(ex);
@@ -354,9 +351,8 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean insertSong(Collection collection, Song song) {
+    public static boolean insertSong(Collection collection, int sid) {
         int cid = collection.get_id();
-        int sid = song.get_id();
 
         String sb = String.format("""
                             INSERT INTO COLLECTIONSONG (collection_id, song_id) VALUES
