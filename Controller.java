@@ -138,6 +138,7 @@ class Controller {
             Genre genre;
             Collection collection;
             int cid, sid;
+            boolean success;
 
             while (!get_out) {
                 try {
@@ -167,15 +168,15 @@ class Controller {
                     case 5: // look into collection based on ID
                         PostgresSSH.listCollection(user);
                         cid = Integer.parseInt(ask("collection id"));
-                        boolean isEmpty = !PostgresSSH.lookIntoCollectionSong(cid);
-                        isEmpty = isEmpty || !PostgresSSH.lookIntoCollectionAlbum(cid);
-                        if (isEmpty) {
+                        boolean is_empty = !PostgresSSH.lookIntoCollectionSong(cid);
+                        is_empty = is_empty && !PostgresSSH.lookIntoCollectionAlbum(cid);
+                        if (is_empty) {
                             System.out.println("This collection is empty.");
                         }
                         break;
                     case 6: // create collection
                         collection = ask_for_collection(user.get_id());
-                        boolean success = PostgresSSH.createCollection(collection);
+                        success = PostgresSSH.createCollection(collection);
                         if (success) {
                             System.out.println("Collection has successfully been created!");
                         } else {
@@ -194,11 +195,16 @@ class Controller {
                     case 10: // Delete song from collection
                         cid = Integer.parseInt(ask("collection id"));
                         sid = Integer.parseInt(ask("song id"));
-                        PostgresSSH.deleteSong(cid, sid, user.get_id());
+                        success = PostgresSSH.deleteSong(cid, sid, user.get_id());
+                        if (success) {
+                            System.out.println("Song has successfully been removed.");
+                        } else {
+                            System.out.println("The song doesn not exist.");
+                        }
                         break;
                     case 11: // Add album to collection
                         break;
-                    case 12: // Delte album from collection
+                    case 12: // Delete album from collection
                         break;
                     case 13: // Listen to a song
                         break;
@@ -214,7 +220,7 @@ class Controller {
                 } catch (Exception e) {
                     System.out.println("Please enter a number.");
                 }
-                System.out.println("");
+                System.out.println("-------------------------------------------------------");
             }
         }
 
