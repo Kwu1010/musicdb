@@ -354,11 +354,14 @@ public class PostgresSSH {
     }
 
     // APPROVED
-    public static boolean insertSong(int cid, int sid) {
+    public static boolean insertSong(int cid, int sid, int uid) {
         String sb = String.format("""
-            INSERT INTO COLLECTIONSONG (collection_id, song_id) VALUES
-            (%d, %d)
-        """, cid, sid);
+            INSERT INTO collectionsong (collection_id, song_id)
+            VALUES (
+                (SELECT collection_id
+                FROM collections
+                WHERE collection_id = %d AND user_id = %d), %d)
+        """, cid, uid, sid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
@@ -419,10 +422,12 @@ public class PostgresSSH {
 
     public static boolean deleteSong(int cid, int sid) {
         String sql = String.format("""
-            DELETE
-            FROM COLLECTIONSONG
-            WHERE COLLECTION_ID = %d AND SONG_ID = %d
-        """, cid, sid);
+            DELETE FROM collectionsong (collection_id, song_id)
+            VALUES (
+                (SELECT collection_id
+                FROM collections
+                WHERE collection_id = %d AND user_id = %d), %d)
+        """, cid, uid, sid);
 
         try {   
             Statement stm = conn.createStatement();
@@ -437,15 +442,14 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean insertAlbum(Collection collection, Album album) {
-        int cid = collection.get_id();
-        int aid = album.get_id();
-
+    public static boolean insertAlbum(int cid, int aid, int uid) {
         String sb = String.format("""
-            INSERT INTO COLLECTIONALBUM (collection_id, album_id) VALUES
-            (%d, %d)
-            WHERE COLLECTIONALBUM.COLLECTION_ID = %d
-        """, cid, aid, cid);
+            INSERT INTO collectionalbum (collection_id, album_id)
+            VALUES (
+                (SELECT collection_id
+                FROM collections
+                WHERE collection_id = %d AND user_id = %d), %d)
+        """, cid, uid, aid);
 
         try {
             Statement stmt = conn.createStatement();
@@ -459,18 +463,14 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean deleteAlbum(Collection collection, Album album) {
-        int cid = collection.get_id();
-        int aid = album.get_id();
-
-
+    public static boolean deleteAlbum(int cid, int aid, int uid) {
         String sb = String.format("""
-            DELETE
-            FROM COLLECTIONALBUM
-            WHERE COLLECTION_ID = %d
-            AND ALBUM_ID = %d
-        """, cid, aid);
-
+            DELETE FROM collectionalbum (collection_id, album_id)
+            VALUES (
+                (SELECT collection_id
+                FROM collections
+                WHERE collection_id = %d AND user_id = %d), %d)
+        """, cid, uid, aid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
@@ -490,11 +490,11 @@ public class PostgresSSH {
         String name = collection.get_collectionname();
         
         String sb = String.format("""
-                                UDPATE COLLECTIONS 
-                                SET COLLECTIONS.COLLECTION_NAME = '%s'
-                                WHERE COLLECTIONS.COLLECTION_ID = %d
-                                AND COLLECTIONS.USER_ID = %d
-                                """, name, cid, uid);
+            UDPATE COLLECTIONS 
+            SET COLLECTIONS.COLLECTION_NAME = '%s'
+            WHERE COLLECTIONS.COLLECTION_ID = %d
+            AND COLLECTIONS.USER_ID = %d
+        """, name, cid, uid);
 
         try {
             Statement stmt = conn.createStatement();
@@ -513,11 +513,11 @@ public class PostgresSSH {
         int uid = user.get_id();
         
         String sb = String.format("""
-                        DELETE 
-                        FROM COLLECTIONS
-                        WHERE COLLECTION_ID = %d
-                        AND USER_ID = %d
-                        """, cid, uid); 
+            DELETE 
+            FROM COLLECTIONS
+            WHERE COLLECTION_ID = %d
+            AND USER_ID = %d
+        """, cid, uid); 
 
         try {
             Statement stmt = conn.createStatement();
@@ -536,9 +536,9 @@ public class PostgresSSH {
         int sid = song.get_id();
 
         String sb = String.format("""
-                        INSERT INTO LISTENHISTORY (user_id, song_id) VALUES
-                        (%d, %d)
-                        """, uid, sid);
+            INSERT INTO LISTENHISTORY (user_id, song_id) VALUES
+            (%d, %d)
+        """, uid, sid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
@@ -556,9 +556,9 @@ public class PostgresSSH {
         int fid = follower.get_id();
         
         String sb = String.format("""
-                        INSERT INTO FOLLOWERS (FOLLOWER_ID, FOLLOWEE_ID) VALUES
-                        (%d, %d
-                        """,uid, fid );
+            INSERT INTO FOLLOWERS (FOLLOWER_ID, FOLLOWEE_ID) VALUES
+            (%d, %d)
+        """,uid, fid );
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
@@ -575,10 +575,10 @@ public class PostgresSSH {
         String email = user.get_email();
 
         String sb = String.format("""
-                        SELECT user_id, username 
-                        FROM users 
-                        WHERE email = '%s'
-                        """, email);
+            SELECT user_id, username 
+            FROM users 
+            WHERE email = '%s'
+        """, email);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
@@ -596,10 +596,10 @@ public class PostgresSSH {
         int fid = follower.get_id();
 
         String sb = String.format("""
-                        DELETE
-                        FROM FOLLOWERS 
-                        WHERE FOLLOWER_ID = %d AND FOLLOWEE_ID = %d
-                        """, uid, fid);
+            DELETE
+            FROM FOLLOWERS 
+            WHERE FOLLOWER_ID = %d AND FOLLOWEE_ID = %d
+        """, uid, fid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
@@ -615,10 +615,10 @@ public class PostgresSSH {
     public static boolean listenToSong(Song song){
         int sid = song.get_id();
         String sb = String.format("""
-                UPDATE SONGS 
-                SET LISTEN_COUNT = LISTEN_COUNT + 1
-                WHERE SONG_ID = %d
-                """, sid);
+            UPDATE SONGS 
+            SET LISTEN_COUNT = LISTEN_COUNT + 1
+            WHERE SONG_ID = %d
+        """, sid);        
 
         try {
             Statement stmt = conn.createStatement();
