@@ -138,8 +138,8 @@ public class PostgresSSH {
         String un = user.get_username();
         String pass = user.get_password();
         String sql = String.format("""
-        SELECT * FROM users
-        WHERE username = '%s' AND password = '%s'
+            SELECT * FROM users
+            WHERE username = '%s' AND password = '%s'
         """, un, pass);
         try {
             Statement stmt = conn.createStatement();
@@ -165,6 +165,7 @@ public class PostgresSSH {
     public static boolean createCollection(Collection collection) {
         int uid = collection.get_userid();
         String name = collection.get_collectionname();
+        System.out.printf("%d %s\n", uid, name);
 
         String sql = String.format("""
             INSERT INTO 
@@ -178,9 +179,7 @@ public class PostgresSSH {
             if (rs.next()) {
                 return true;
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+        } catch (SQLException ex) {}
         return false;
     }
 
