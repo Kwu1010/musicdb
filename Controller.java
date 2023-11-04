@@ -219,9 +219,30 @@ class Controller {
                         PostgresSSH.deleteAlbum(cid, aid, user.get_id());
                         break;
                     case 13: // Listen to a song
+                        outer: while (true) {
+                            String input = ask("Listen to a song or collection (S/C)");
+                            switch (input) {
+                                case "S":
+                                    sid = Integer.parseInt(ask("song id"));
+                                    PostgresSSH.listenToSong(sid, user.get_id());
+                                    break outer;
+                                case "C":
+                                    cid = Integer.parseInt(ask("collection id"));
+                                    PostgresSSH.listenToSongCollection(cid, user.get_id());
+                                    break outer;
+                                default:
+                                    System.out.println("Invalid Option!");;
+                            }
+                        }
                         break;
                     case 14: // Search for another user
-                        break;
+                        String email = ask("Search for the email of the other user: ");
+                        success = PostgresSSH.searchEmail(email);
+                        if (success) {
+                            System.out.println("That user exist.");
+                        } else {
+                            System.out.println("That user doesn't exist.");
+                        }
                     case 15: // Follow user
                         break;
                     case 16: // Unfollow user
