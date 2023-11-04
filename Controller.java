@@ -169,7 +169,8 @@ class Controller {
                         PostgresSSH.listCollection(user);
                         cid = Integer.parseInt(ask("collection id"));
                         boolean is_empty = !PostgresSSH.lookIntoCollectionSong(cid);
-                        is_empty = is_empty && !PostgresSSH.lookIntoCollectionAlbum(cid);
+                        boolean tmp = PostgresSSH.lookIntoCollectionAlbum(cid);
+                        is_empty = is_empty && tmp;
                         if (is_empty) {
                             System.out.println("This collection is empty.");
                         }
@@ -207,7 +208,7 @@ class Controller {
                         aid = Integer.parseInt(ask("album id"));
                         PostgresSSH.insertAlbum(cid, aid, user.get_id());
                         break;
-                    case 12: // Delte album from collection
+                    case 12: // Delete album from collection
                         cid = Integer.parseInt(ask("collection id"));
                         aid = Integer.parseInt(ask("album id"));
                         PostgresSSH.deleteAlbum(cid, aid, user.get_id());

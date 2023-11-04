@@ -364,7 +364,7 @@ public class PostgresSSH {
         """, cid, uid, sid);
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb);
+            stmt.executeQuery(sb);
         } catch (SQLException ex) {}
         return true;
     }
@@ -372,7 +372,8 @@ public class PostgresSSH {
     public static boolean lookIntoCollectionSong(int cid) {
         String sb = String.format("""
             SELECT
-                SONGS.SONG_TITLE AS "song_title"
+                SONGS.SONG_TITLE AS "song_title",
+                SONGS.SONG_ID as "song_id"
             FROM COLLECTIONS
             JOIN COLLECTIONSONG ON COLLECTIONSONG.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
             JOIN SONGS ON SONGS.SONG_ID = COLLECTIONSONG.SONG_ID
@@ -385,19 +386,22 @@ public class PostgresSSH {
                 System.out.println("These are the following songs and albums in this collection: ");
                 do {
                     //check whether it is a song or an album 
-                    System.out.println(rs.getString("song_title"));
+                    System.out.printf("%d: %s\n", rs.getInt("song_id"), rs.getString("song_title"));
                 } while (rs.next());
                 System.out.println("");
                 return true;
             }
-        } catch (SQLException ex) {}
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
         return false;
     }
 
     public static boolean lookIntoCollectionAlbum(int cid) {
         String sb = String.format("""
             SELECT
-                ALBUMS.ALBUM_NAME AS "album_name"
+                ALBUMS.ALBUM_NAME AS "album_name",
+                ALBUMS.ALBUM_ID as "album_id"
             FROM COLLECTIONS
                 JOIN COLLECTIONALBUM ON COLLECTIONALBUM.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
                 JOIN ALBUMS ON ALBUMS.ALBUM_ID = COLLECTIONALBUM.ALBUM_ID
@@ -409,7 +413,7 @@ public class PostgresSSH {
             if (rs.next()) {
                 System.out.println("These are the following albums in this collection: ");
                 do {
-                     rs.getString("album_name");
+                    System.out.printf("%d: %s\n", rs.getInt("album_id"), rs.getString("album_name"));
                 } while (rs.next());
                 System.out.println("");
                 return true;
@@ -438,7 +442,9 @@ public class PostgresSSH {
             } else {
                 return false;
             }
-        } catch (SQLException ex) {}
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
         return false;
     }
 
