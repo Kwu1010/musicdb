@@ -426,7 +426,7 @@ public class PostgresSSH {
             WHERE collection_id IN
                 (SELECT collection_id
                 FROM collections
-                WHERE collection_id = %d AND user_id = %d), %d)
+                WHERE collection_id = %d AND user_id = %d) AND song_id = %d
         """, cid, uid, sid);
 
         try {   
@@ -469,7 +469,7 @@ public class PostgresSSH {
             WHERE collection_id IN
                 (SELECT collection_id
                 FROM collections
-                WHERE collection_id = %d AND user_id = %d), %d)
+                WHERE collection_id = %d AND user_id = %d) AND album_id %d)
         """, cid, uid, aid);
         try {
             Statement stmt = conn.createStatement();
