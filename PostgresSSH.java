@@ -420,7 +420,7 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean deleteSong(int cid, int sid) {
+    public static boolean deleteSong(int cid, int sid, int uid) {
         String sql = String.format("""
             DELETE FROM collectionsong (collection_id, song_id)
             VALUES (
