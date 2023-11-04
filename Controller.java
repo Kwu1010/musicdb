@@ -183,8 +183,13 @@ class Controller {
                         }
                         break;
                     case 7: // Change name of collection
+                        cid = Integer.parseInt(ask("Collection ID"));
+                        String name = ask("New Collection Name");
+                        PostgresSSH.updateCollectionName(name, cid, user.get_id());
                         break;
                     case 8: // Delete collection
+                        cid = Integer.parseInt(ask("Collection ID"));
+                        PostgresSSH.deleteCollection(cid, user.get_id());
                         break;
                     case 9: // Add song to collection
                         cid = Integer.parseInt(ask("collection id"));
