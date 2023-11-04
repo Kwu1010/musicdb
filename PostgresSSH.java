@@ -366,9 +366,55 @@ public class PostgresSSH {
         return true;
     }
 
-    public static boolean lookIntoCollection(int cid) {
-        // TODO
-        return false;
+    public static boolean lookIntoCollectionSong(int cid) {
+        String sb = String.format("""
+            SELECT
+                SONG.SONG_TITLE AS "song_title"
+            FROM COLLECTIONS
+                JOIN COLLECTIONSONG ON COLLECTIONSONG.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
+                JOIN SONG ON SONG.SONG_ID = COLLECTIONSONG.SONG_ID
+            WHERE COLLECTION_ID = %d
+        """, cid);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+            if (rs.next()) {
+                System.out.println("These are the following songs and albums in this collection: ");
+                do {
+                    //check whether it is a song or an album 
+                    System.out.println(rs.getString("song_title"));
+                } while (rs.next());
+                return true;
+            } else {
+                System.out.println("This collection is empty");
+            }
+        } catch (SQLException ex) {}
+        return true;
+    }
+
+    public static boolean lookIntoCollectionAlbum(int cid) {
+        String sb = String.format("""
+            SELECT
+                ALBUM.ALBUM_NAME AS "album_name"
+            FROM COLLECTIONS
+                JOIN COLLECTIONALBUM ON COLLECTIONALBUM.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
+                JOIN ALBUM ON ALBUM.ALBUM_ID = COLLECTIONALBUM.ALBUM_ID
+            WHERE COLLECTION_ID = %d
+        """, cid);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+            if (rs.next()) {
+                System.out.println("These are the following albums in this collection: ");
+                do {
+                     rs.getString("album_name");
+                } while (rs.next());
+                return true;
+            } else {
+                System.out.println("This collection has no albums");
+            }
+        } catch (SQLException ex) {}
+        return true;
     }
 
     public static boolean deleteSong(int cid, int sid) {
