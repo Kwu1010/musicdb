@@ -265,15 +265,13 @@ public class PostgresSSH {
             if (rs.next()) {
                 System.out.println("The song is sang by the following artists. Which one are you referring to: ");
                 do {
-                    System.out.println(rs.getString("song_id") + ", " + rs.getString("song_title"));
+                    System.out.println(rs.getString("song_id") + ": " + rs.getString("song_title"));
                 } while (rs.next());
                 return true;
             } else {
-                System.out.println("The song does not exist.");
+                System.out.println("The artist does not have any songs under their name.");
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+        } catch (SQLException ex) {}
         return false;
     }
 
@@ -282,21 +280,21 @@ public class PostgresSSH {
         String aname = album.get_albumname();
 
         String sql = String.format("""
-                    SELECT
-                        SONGS.SONG_ID as "song_id",
-                        ARTISTS.ARTIST_NAME,
-                        SONGS.SONG_TITLE as "song_title",
-                        ALBUMS.ALBUM_NAME,
-                        SONGS.SONG_LENGTH,
-                        SONGS.RELEASE_DATE
-                    FROM ALBUMS
-                    JOIN ALBUMARTIST ON ALBUMARTIST.ALBUM_ID = ALBUMS.ALBUM_ID
-                    JOIN ARTISTS ON ARTISTS.ARTIST_ID  = ALBUMARTIST.ARTIST_ID
+            SELECT
+                SONGS.SONG_ID as "song_id",
+                ARTISTS.ARTIST_NAME,
+                SONGS.SONG_TITLE as "song_title",
+                ALBUMS.ALBUM_NAME,
+                SONGS.SONG_LENGTH,
+                SONGS.RELEASE_DATE
+            FROM ALBUMS
+            JOIN ALBUMARTIST ON ALBUMARTIST.ALBUM_ID = ALBUMS.ALBUM_ID
+            JOIN ARTISTS ON ARTISTS.ARTIST_ID  = ALBUMARTIST.ARTIST_ID
 
-                    JOIN SONGALBUM ON SONGALBUM.ALBUM_ID  = ALBUMS.ALBUM_ID
-                    JOIN SONGS ON SONGS.SONG_ID  = SONGALBUM.SONG_ID
-                    WHERE ALBUMS.ALBUM_NAME = '%s'
-                """, aname);
+            JOIN SONGALBUM ON SONGALBUM.ALBUM_ID  = ALBUMS.ALBUM_ID
+            JOIN SONGS ON SONGS.SONG_ID  = SONGALBUM.SONG_ID
+            WHERE ALBUMS.ALBUM_NAME = '%s'
+        """, aname);
 
         try {
             Statement stmt = conn.createStatement();
@@ -304,11 +302,11 @@ public class PostgresSSH {
             if (rs.next()) {
                 System.out.println("The following song is in the album. Which one are you referring to: ");
                 do {
-                    System.out.println(rs.getString("song_id") + ", " + rs.getString("song_title"));
+                    System.out.println(rs.getString("song_id") + ": " + rs.getString("song_title"));
                 } while (rs.next());
                 return true;
             } else {
-                System.out.println("The album does not exist.");
+                System.out.println("There's no songs in the album.");
             }
         } catch (SQLException ex) {
             System.out.println(ex);
@@ -347,11 +345,9 @@ public class PostgresSSH {
                 } while (rs.next());
                 return true;
             } else {
-                System.out.println("The song does not exist.");
+                System.out.println("There are no songs under this genre.");
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+        } catch (SQLException ex) {}
         return false;
     }
 
@@ -387,7 +383,7 @@ public class PostgresSSH {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
             if (rs.next()) {
-                System.out.println("These are the following songs and albums in this collection: ");
+                System.out.println("These are the songs in this collection: ");
                 do {
                     // check whether it is a song or an album
                     System.out.printf("%d: %s\n", rs.getInt("song_id"), rs.getString("song_title"));
@@ -395,9 +391,7 @@ public class PostgresSSH {
                 System.out.println("");
                 return true;
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+        } catch (SQLException ex) {}
         return false;
     }
 
@@ -416,17 +410,14 @@ public class PostgresSSH {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
             if (rs.next()) {
-                System.out.println("These are the following albums in this collection: ");
+                System.out.println("These are the albums in this collection: ");
                 do {
                     System.out.printf("%d: %s\n", rs.getInt("album_id"), rs.getString("album_name"));
                 } while (rs.next());
                 System.out.println("");
                 return true;
             }
-            System.out.println("NOTHING");
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+        } catch (SQLException ex) {}
         return false;
     }
 
@@ -503,14 +494,9 @@ public class PostgresSSH {
 
         try {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()) {
-                return true;
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return false;
+            stmt.executeQuery(sb.toString());
+        } catch (SQLException ex) {}
+        return true;
     }
 
     // APPROVED
@@ -528,15 +514,12 @@ public class PostgresSSH {
             if (rs.next()) {
                 return true;
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+        } catch (SQLException ex) {}
         return false;
     }
 
     // APPROVED
     public static boolean follow(int follower, int followee) {
-        System.out.println(follower + " " + followee);
         String sql = String.format("""
             INSERT INTO FOLLOWERS (
                 FOLLOWER_ID, FOLLOWEE_ID

@@ -130,6 +130,7 @@ class Controller {
         }
         
         if (logged) {
+            System.out.printf("Welcome, %s %s!\n", user.get_first_name(), user.get_last_name());
             // PRE DEFINED VARIABLES
             boolean get_out = false;
             Song song;
@@ -170,7 +171,7 @@ class Controller {
                         PostgresSSH.listCollection(user);
                         cid = Integer.parseInt(ask("collection id"));
                         boolean is_empty = !PostgresSSH.lookIntoCollectionSong(cid);
-                        boolean tmp = PostgresSSH.lookIntoCollectionAlbum(cid);
+                        boolean tmp = !PostgresSSH.lookIntoCollectionAlbum(cid);
                         is_empty = is_empty && tmp;
                         if (is_empty) {
                             System.out.println("This collection is empty.");
@@ -264,6 +265,8 @@ class Controller {
                 System.out.println("-------------------------------------------------------");
             }
         }
+
+        System.out.println("Bye Bye!!!!");
 
         sc.close();
         PostgresSSH.close_connection();
