@@ -28,7 +28,7 @@ class Controller {
     private static String ask(String var_name) {
         String var;
         while (true) {
-            System.out.println(var_name + ": ");
+            System.out.print(var_name + ": ");
             var = sc.next();
             if (!var.isEmpty()) {
                 break;
@@ -94,7 +94,7 @@ class Controller {
         boolean logged = false;
         User user = null;
         outer: while (!logged) {
-            System.out.println("Login/Register/Quit (L/R/Q): ");
+            System.out.print("Login/Register/Quit (L/R/Q): ");
             String op = sc.next();
             System.out.println("");
 
@@ -114,7 +114,8 @@ class Controller {
                 if (success) {
                     System.out.println("Your account has been successfully created! Please go to the login page.\n");
                     User cur = PostgresSSH.findUser(user);
-                    PostgresSSH.createCollection(new Collection("Favorite", cur.get_id()));
+                    Collection col = new Collection("Favorites", cur.get_id());
+                    PostgresSSH.createCollection(col);
                 } else {
                     System.out.println("The creation of your account was unsuccessful. Please try again.\n");
                 }
@@ -134,9 +135,11 @@ class Controller {
             Genre genre;
             Collection collection;
             while (!get_out) {
-                print_help();
                 try {
-                    int op = sc.nextInt();
+                    print_help();
+                    System.out.print("owo: ");
+                    String s = sc.next();
+                    int op = Integer.parseInt(s);
                     switch (op) {
                     case 0:
                         get_out = true;
@@ -157,10 +160,10 @@ class Controller {
                         genre = ask_for_genre();
                         PostgresSSH.searchSongGenre(genre);
                         break;
-                    // case 5:
-                    //     collection = ask_for_collection();
-                    //     song = ask_for_song();
-                    //     PostgresSSH.insertSong(collection, song);
+                    case 5:
+                        collection = ask_for_collection();
+                        song = ask_for_song();
+                        PostgresSSH.insertSong(collection, song);
                     // case 6:
                     //     collection = ask_for_collection();
                     //     song = ask_for_song();
@@ -170,10 +173,10 @@ class Controller {
                     //     album = ask_for_album();
                     //     PostgresSSH.deleteAlbum(collection, album);
                     default:
-                        System.out.println("No such operation. Please select your desired operation.");
+                        System.out.println("No such operation. Please select your desired operation.\n");
                     }
                 } catch (Exception e) {
-                    System.out.println("Please enter a number.");
+                    System.out.println("Please enter a number.\n");
                 }
             }
         }
