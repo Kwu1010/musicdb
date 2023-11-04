@@ -487,15 +487,12 @@ public class PostgresSSH {
         return true;
     }
 
-    public static boolean updateCollectionName(Collection collection, int uid) {
-        int cid = collection.get_id();
-        String name = collection.get_collectionname();
-
+    public static boolean updateCollectionName(String name, int cid, int uid) {
         String sb = String.format("""
-            UDPATE COLLECTIONS 
-            SET COLLECTIONS.COLLECTION_NAME = '%s'
-            WHERE COLLECTIONS.COLLECTION_ID = %d
-            AND COLLECTIONS.USER_ID = %d
+            UPDATE COLLECTIONS 
+            SET COLLECTION_NAME = '%s'
+            WHERE COLLECTION_ID = %d
+            AND USER_ID = %d
         """, name, cid, uid);
 
         try {
@@ -510,10 +507,7 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean deleteCollection(Collection collection, User user) {
-        int cid = collection.get_id();
-        int uid = user.get_id();
-        
+    public static boolean deleteCollection(int cid, int uid) {
         String sb = String.format("""
             DELETE 
             FROM COLLECTIONS
