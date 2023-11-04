@@ -206,7 +206,7 @@ public class PostgresSSH {
 
         String sql = String.format("""
             SELECT 
-                SONGS.SONG_ID as "song_id,
+                SONGS.SONG_ID as "song_id",
                 SONGS.SONG_TITLE,
                 ARTISTS.ARTIST_NAME as "artist_name",
                 ALBUMS.ALBUM_NAME,
@@ -280,7 +280,8 @@ public class PostgresSSH {
         String aname = album.get_albumname();
 
         String sql = String.format("""
-            SELECT 
+            SELECT
+                SONGS.SONG_ID as "song_id",
                 ARTISTS.ARTIST_NAME,
                 SONGS.SONG_TITLE as "song_title",
                 ALBUMS.ALBUM_NAME,
@@ -301,7 +302,7 @@ public class PostgresSSH {
             if (rs.next()) {
                 System.out.println("The following song is in the album. Which one are you referring to: ");
                 do {
-                    System.out.println(rs.getString("song_title"));
+                    System.out.println(rs.getString("song_id") + ", " + rs.getString("song_title"));
                 } while (rs.next());
                 return true;
             } else {
@@ -318,6 +319,7 @@ public class PostgresSSH {
         String type = genre.get_genre();
         String sql = String.format("""
             SELECT 
+                SONGS.SONG_ID as "song_id",
                 ARTISTS.ARTIST_NAME,
                 SONGS.SONG_TITLE as "song_title",
                 ALBUMS.ALBUM_NAME,
@@ -339,7 +341,7 @@ public class PostgresSSH {
             if (rs.next()) {
                 System.out.printf("The following songs are %s. Which one do you want to add: \n", type);
                 do {
-                    System.out.println(rs.getString("song_title"));
+                    System.out.println(rs.getString("song_id") + ", " + rs.getString("song_title"));
                 } while (rs.next());
                 return true;
             } else {
@@ -351,45 +353,43 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean insertSong(Collection collection, int sid) {
-        int cid = collection.get_id();
-
+    // APPROVED
+    public static boolean insertSong(int cid, int sid) {
         String sb = String.format("""
-                            INSERT INTO COLLECTIONSONG (collection_id, song_id) VALUES
-                            (%d, %d)
-                            WHERE COLLECTIONSONG.COLLECTION_ID = %d
-                            """, cid, sid, cid);
+            INSERT INTO COLLECTIONSONG (collection_id, song_id) VALUES
+            (%d, %d)
+        """, cid, sid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
-            if (rs.next()){
-                return true;
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+        } catch (SQLException ex) {}
+        return true;
+    }
+
+    public static boolean lookIntoCollection(int cid) {
+        // TODO
         return false;
     }
 
-    public static boolean deleteSong(Collection collection, Song song) {
-        int cid = collection.get_id();
-        int sid = song.get_id();
+    public static boolean deleteSong(int cid, int sid) {
 
-        String sb = String.format("""
-                                DELETE 
-                                FROM COLLECTION 
-                                WHERE COLLECTION_ID = %d 
-                                AND SONG_ID = %d
-                                """, cid, sid);     
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb.toString());
-            if (rs.next()){
+        String sql = String.format("""
+            DELETE 
+            FROM COLLECTIONSONG
+            WHERE COLLECTION_ID = %d
+            AND SONG_ID = %d
+        """, cid, sid);
+
+        try {   
+            Statement smh = conn.createStatement();
+            int rowsAffected = smh.executeUpdate(sql);
+            
+            if (rowsAffected > 0) {
                 return true;
+            } else {
+                return false;
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+        } catch (SQLException ex) {}
         return false;
     }
 
@@ -398,10 +398,11 @@ public class PostgresSSH {
         int aid = album.get_id();
 
         String sb = String.format("""
-                                INSERT INTO COLLECTIONALBUM (collection_id, album_id) VALUES
-                                (%d, %d)
-                                WHERE COLLECTIONALBUM.COLLECTION_ID = %d
-                                """, cid, aid, cid);
+            INSERT INTO COLLECTIONALBUM (collection_id, album_id) VALUES
+            (%d, %d)
+            WHERE COLLECTIONALBUM.COLLECTION_ID = %d
+        """, cid, aid, cid);
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
@@ -612,4 +613,4 @@ public class PostgresSSH {
         }
         return false;
     }
-}                                                                                                                                                                             
+}
