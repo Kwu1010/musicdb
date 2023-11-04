@@ -579,17 +579,10 @@ public class PostgresSSH {
     }
 
     public static boolean unfollow(String email, int uid) {
-        // int uid = user.get_id();
-        // int fid = follower.get_id();
-
         String sb = String.format("""
-            SELECT 
-                USER_ID AS "FOLLOW_ID"
-            FROM USERS
-            WHERE USERS.EMAIL = %s
-            DELETE
-            FROM FOLLOWERS 
-            WHERE FOLLOWER_ID = %d AND FOLLOWEE_ID = FOLLOW_ID
+            DELETE FROM followers
+            WHERE follower_id = (SELECT user_id FROM users WHERE email = '%s')
+            AND followed_id = %d;
         """, email, uid);
         try {
             Statement stmt = conn.createStatement();
