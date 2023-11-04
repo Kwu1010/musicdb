@@ -137,7 +137,7 @@ class Controller {
             Album album;
             Genre genre;
             Collection collection;
-            int cid, sid;
+            int cid, sid, aid;
             boolean success;
 
             while (!get_out) {
@@ -203,8 +203,14 @@ class Controller {
                         }
                         break;
                     case 11: // Add album to collection
+                        cid = Integer.parseInt(ask("collection id"));
+                        aid = Integer.parseInt(ask("album id"));
+                        PostgresSSH.insertAlbum(cid, aid, user.get_id());
                         break;
-                    case 12: // Delete album from collection
+                    case 12: // Delte album from collection
+                        cid = Integer.parseInt(ask("collection id"));
+                        aid = Integer.parseInt(ask("album id"));
+                        PostgresSSH.deleteAlbum(cid, aid, user.get_id());
                         break;
                     case 13: // Listen to a song
                         break;
