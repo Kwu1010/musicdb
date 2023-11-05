@@ -238,10 +238,10 @@ class Controller {
                         }
                         break;
                     case 14: // Search for another user
-                        email = ask("Search for the email of the other user: ");
-                        success = PostgresSSH.searchEmail(email);
-                        if (success) {
-                            System.out.println("That user exist.");
+                        email = ask("Search for the email of the other user");
+                        uid = PostgresSSH.searchEmail(email);
+                        if (uid != -1) {
+                            System.out.printf("The user exist and their user id is %d.\n", uid);
                         } else {
                             System.out.println("That user doesn't exist.");
                         }

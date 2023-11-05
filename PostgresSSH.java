@@ -579,24 +579,23 @@ public class PostgresSSH {
     }
 
     // APPROVED
-    public static boolean searchEmail(User user) {
-        String email = user.get_email();
-
+    public static int searchEmail(String email) {
         String sb = String.format("""
             SELECT user_id, username 
             FROM users 
             WHERE email = '%s'
         """, email);
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb.toString());
             if (rs.next()){
-                return true;
+                return rs.getInt("user_id");
             }
         } catch (SQLException ex) {
             System.out.println(ex);
         }
-        return false;
+        return -1;
     }
 
     // APPROVED
@@ -625,23 +624,6 @@ public class PostgresSSH {
         try {
             Statement stmt = conn.createStatement();
             stmt.executeQuery(sb.toString());
-        } catch (SQLException ex) {}
-        return false;
-    }
-
-    // APPROVED
-    public static boolean searchEmail(String email) {
-        String sb = String.format("""
-                    SELECT user_id, username
-                    FROM users
-                    WHERE email = '%s'
-                """, email);
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb);
-            if (rs.next()) {
-                return true;
-            }
         } catch (SQLException ex) {}
         return false;
     }
