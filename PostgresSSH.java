@@ -204,8 +204,13 @@ public class PostgresSSH {
             while (rs.next()) {
                 String name = rs.getString("Collection Name");
                 System.out.printf("%d: %s\n", rs.getInt("COLLECTION_ID"), name);
-                System.out.println(String.format("Cumulative duration of songs in this collection: %d", rs.getInt("Total Duration")));
-                System.out.println(String.format("# of songs in this collection: %d", rs.getInt("Number of Songs")));
+                int sec = rs.getInt("Total Duration");
+                int hour = sec / 3600;
+                sec %= 3600;
+                int min = sec / 60;
+                sec %= 60;
+                System.out.println(String.format("Total Duration: %02d:%02d:%02d", hour, min, sec));
+                System.out.println(String.format("# of songs: %d", rs.getInt("Number of Songs")));
                 System.out.println("");
             }
         } catch (SQLException ex) {
