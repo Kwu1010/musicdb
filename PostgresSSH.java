@@ -86,9 +86,9 @@ public class PostgresSSH {
     // APPROVED
     private static boolean exist(String username) {
         String sql = String.format("""
-                    SELECT username FROM users
-                    WHERE username = '%s'
-                """, username);
+            SELECT username FROM users
+            WHERE username = '%s'
+        """, username);
 
         try {
             Statement stmt = conn.createStatement();
@@ -140,26 +140,35 @@ public class PostgresSSH {
         String un = user.get_username();
         String pass = user.get_password();
         String sql = String.format("""
-                    SELECT * FROM users
-                    WHERE username = '%s' AND password = '%s'
-                """, un, pass);
+            SELECT * FROM users
+            WHERE username = '%s' AND password = '%s';
+
+        """, un, pass);
+        User returned_user = null;
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
-                return new User(
-                        rs.getString("USERNAME"),
-                        rs.getString("PASSWORD"),
-                        rs.getString("FIRST_NAME"),
-                        rs.getString("LAST_NAME"),
-                        rs.getString("EMAIL"),
-                        rs.getInt("USER_ID"),
-                        rs.getString("CREATION_DATE"));
+                returned_user = new User(
+                    rs.getString("USERNAME"),
+                    rs.getString("PASSWORD"),
+                    rs.getString("FIRST_NAME"),
+                    rs.getString("LAST_NAME"),
+                    rs.getString("EMAIL"),
+                    rs.getInt("USER_ID"),
+                    rs.getString("CREATION_DATE")
+                );
+                try {
+                    sql = String.format("""
+                        UPDATE users
+                        SET last_access_date = '%s'
+                        WHERE username = '%s'
+                    """, LocalDateTime.now(), un);
+                    stmt.executeQuery(sql);
+                } catch (SQLException e) {}
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return null;
+        } catch (SQLException ex) {}
+        return returned_user;
     }
 
     // APPROVED
@@ -187,13 +196,13 @@ public class PostgresSSH {
 
         String sql = String.format("""
             SELECT 
-            COLLECTIONS.COLLECTION_ID AS "COLLECTION_ID",
-            COLLECTIONS.COLLECTION_NAME AS "Collection Name",
-            COUNT(COLLECTIONSONG.SONG_ID) AS "Number of Songs",
-            COALESCE(SUM(SONGS.SONG_LENGTH), 0) / 60 AS "Total Duration"
+                COLLECTIONS.COLLECTION_ID AS "COLLECTION_ID",
+                COLLECTIONS.COLLECTION_NAME AS "Collection Name",
+                COALESCE(COUNT(COLLECTIONSONG.SONG_ID), 0) AS "Number of Songs",
+                COALESCE(SUM(SONGS.SONG_LENGTH), 0) AS "Total Duration"
             FROM COLLECTIONS
-            JOIN COLLECTIONSONG ON COLLECTIONSONG.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
-            JOIN SONGS ON COLLECTIONSONG.SONG_ID = SONGS.SONG_ID
+            LEFT JOIN COLLECTIONSONG ON COLLECTIONSONG.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
+            LEFT JOIN SONGS ON COLLECTIONSONG.SONG_ID = SONGS.SONG_ID
             WHERE USER_ID = '%d'
             GROUP BY COLLECTIONS.COLLECTION_NAME, COLLECTIONS.COLLECTION_ID
             ORDER BY COLLECTIONS.COLLECTION_NAME ASC;
