@@ -186,16 +186,27 @@ public class PostgresSSH {
         int uid = user.get_id();
 
         String sql = String.format("""
-                    SELECT * FROM COLLECTIONS
-                    WHERE USER_ID = '%d'
-                    ORDER BY COLLECTION_NAME ASC;
-                """, uid);
+            SELECT 
+            COLLECTIONS.COLLECTION_ID AS "COLLECTION_ID",
+            COLLECTIONS.COLLECTION_NAME AS "Collection Name",
+            COUNT(COLLECTIONSONG.SONG_ID) AS "Number of Songs",
+            COALESCE(SUM(SONGS.SONG_LENGTH), 0) / 60 AS "Total Duration"
+            FROM COLLECTIONS
+            JOIN COLLECTIONSONG ON COLLECTIONSONG.COLLECTION_ID = COLLECTIONS.COLLECTION_ID
+            JOIN SONGS ON COLLECTIONSONG.SONG_ID = SONGS.SONG_ID
+            WHERE USER_ID = '%d'
+            GROUP BY COLLECTIONS.COLLECTION_NAME, COLLECTIONS.COLLECTION_ID
+            ORDER BY COLLECTIONS.COLLECTION_NAME ASC;
+        """, uid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                String name = rs.getString("collection_name");
+                String name = rs.getString("Collection Name");
                 System.out.printf("%d: %s\n", rs.getInt("COLLECTION_ID"), name);
+                System.out.println(String.format("Cumulative duration of songs in this collection: %d", rs.getInt("Total Duration")));
+                System.out.println(String.format("# of songs in this collection: %d", rs.getInt("Number of Songs")));
+                System.out.println("");
             }
         } catch (SQLException ex) {
             System.out.println(ex);
