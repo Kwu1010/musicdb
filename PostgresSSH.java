@@ -118,13 +118,12 @@ public class PostgresSSH {
         }
 
         String sql = String.format("""
-                    INSERT INTO
-                        USERS (
-                            username, password, first_name, last_name, email, creation_date, last_access_date
-                        ) VALUES (
-                            '%s', '%s', '%s', '%s', '%s', '%s', '%s'
-                        )
-                """, un, pass, fn, ln, email, cd, lad);
+            INSERT INTO USERS (
+                username, password, first_name, last_name, email, creation_date, last_access_date
+            ) VALUES (
+                '%s', '%s', '%s', '%s', '%s', '%s', '%s'
+            )
+        """, un, pass, fn, ln, email, cd, lad);
 
         try {
             Statement stmt = conn.createStatement();
@@ -177,10 +176,10 @@ public class PostgresSSH {
         String name = collection.get_collectionname();
 
         String sql = String.format("""
-                    INSERT INTO
-                        COLLECTIONS (collection_name, user_id)
-                        VALUES ('%s', '%s')
-                """, name, uid);
+            INSERT INTO
+                COLLECTIONS (collection_name, user_id)
+                VALUES ('%s', '%s')
+        """, name, uid);
 
         try {
             Statement stmt = conn.createStatement();
@@ -343,22 +342,22 @@ public class PostgresSSH {
     public static boolean searchSongGenre(Genre genre) {
         String type = genre.get_genre();
         String sql = String.format("""
-                    SELECT
-                        SONGS.SONG_ID as "song_id",
-                        ARTISTS.ARTIST_NAME,
-                        SONGS.SONG_TITLE as "song_title",
-                        ALBUMS.ALBUM_NAME,
-                        SONGS.SONG_LENGTH,
-                        SONGS.RELEASE_DATE
-                    FROM GENRES
-                    JOIN SONGGENRE ON SONGGENRE.GENRE_ID = GENRES.GENRE_ID
-                    JOIN SONGS ON SONGS.SONG_ID = SONGGENRE.SONG_ID
-                    JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
-                    JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
-                    JOIN SONGALBUM ON SONGS.SONG_ID = SONGALBUM.SONG_ID
-                    JOIN ALBUMS ON SONGALBUM.ALBUM_ID = ALBUMS.ALBUM_ID
-                    WHERE GENRES.TYPE = '%s'
-                """, type);
+            SELECT
+                SONGS.SONG_ID as "song_id",
+                ARTISTS.ARTIST_NAME,
+                SONGS.SONG_TITLE as "song_title",
+                ALBUMS.ALBUM_NAME,
+                SONGS.SONG_LENGTH,
+                SONGS.RELEASE_DATE
+            FROM GENRES
+            JOIN SONGGENRE ON SONGGENRE.GENRE_ID = GENRES.GENRE_ID
+            JOIN SONGS ON SONGS.SONG_ID = SONGGENRE.SONG_ID
+            JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
+            JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
+            JOIN SONGALBUM ON SONGS.SONG_ID = SONGALBUM.SONG_ID
+            JOIN ALBUMS ON SONGALBUM.ALBUM_ID = ALBUMS.ALBUM_ID
+            WHERE GENRES.TYPE = '%s'
+        """, type);
 
         try {
             Statement stmt = conn.createStatement();
@@ -474,12 +473,12 @@ public class PostgresSSH {
     // APPROVED
     public static boolean insertAlbum(int cid, int aid, int uid) {
         String sb = String.format("""
-                    INSERT INTO collectionalbum (collection_id, album_id)
-                    VALUES (
-                        (SELECT collection_id
-                        FROM collections
-                        WHERE collection_id = %d AND user_id = %d), %d)
-                """, cid, uid, aid);
+            INSERT INTO collectionalbum (collection_id, album_id)
+            VALUES (
+                (SELECT collection_id
+                FROM collections
+                WHERE collection_id = %d AND user_id = %d), %d)
+        """, cid, uid, aid);
 
         try {
             Statement stmt = conn.createStatement();

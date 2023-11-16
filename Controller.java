@@ -26,6 +26,7 @@ class Controller {
         System.out.println("\t14. Search for another user");
         System.out.println("\t15. Follow User");
         System.out.println("\t16. Unfollow User");
+        System.out.println("\t17. See profile");
     }
 
     private static String ask(String var_name) {
@@ -255,6 +256,8 @@ class Controller {
                         email = ask("email");
                         uid = user.get_id();
                         PostgresSSH.unfollow(email , uid);
+                        break;
+                    case 17: // See user profile
                         break;
                     default:
                         System.out.println("No such operation. Please select your desired operation.");
