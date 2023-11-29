@@ -1,5 +1,6 @@
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 import Model.*;
@@ -27,6 +28,7 @@ class Controller {
         System.out.println("\t15. Follow User");
         System.out.println("\t16. Unfollow User");
         System.out.println("\t17. See profile");
+        System.out.println("\t18. View top 5 genres this month");
     }
 
     private static String ask(String var_name) {
@@ -258,6 +260,12 @@ class Controller {
                         PostgresSSH.unfollow(email , uid);
                         break;
                     case 17: // See user profile
+                        break;
+                    case 18: // See top 5 popular genres of the calendar month
+                        LocalDateTime now = LocalDateTime.now();
+                        String month = Integer.toString(now.getMonthValue());
+                        String year = Integer.toString(now.getYear());
+                        PostgresSSH.topFiveGenres(month, year);
                         break;
                     default:
                         System.out.println("No such operation. Please select your desired operation.");

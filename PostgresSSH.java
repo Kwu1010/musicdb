@@ -643,4 +643,31 @@ public class PostgresSSH {
         } catch (SQLException ex) {}
         return true;
     }
+
+    public static boolean topFiveGenres(String month, String year) {
+        String sb = String.format("""
+                SELECT type, COUNT(*) as numSongs FROM songs
+                INNER JOIN (
+                    SELECT * FROM listenhistory WHERE EXTRACT(MONTH FROM datetime) = '%s' AND EXTRACT(YEAR FROM datetime) = '%s'
+                ) as calendarMonth ON songs.song_id = calendarMonth.song_id
+                INNER JOIN songgenre ON songs.song_id = songgenre.song_id
+                INNER JOIN genres ON songgenre.genre_id = genres.genre_id
+                GROUP BY type
+                ORDER BY numSongs DESC
+                LIMIT 5
+            """, month, year);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+            if(rs.next()) {
+                System.out.println("These are the top 5 genres this month: ");
+                do {
+                    System.out.printf("%s\n", rs.getString("type"));
+                } while (rs.next());
+                System.out.println("");
+                return true;
+            }
+        } catch (SQLException ex) {}
+        return false;
+    }
 }
