@@ -704,4 +704,33 @@ public class PostgresSSH {
         } catch (SQLException ex) {}
         return false;
     }
+
+    public static boolean top50FollowerSongs(int uid) {
+        String sb = String.format("""
+                SELECT song_title, COUNT(*) as count
+                FROM followers
+                JOIN listenhistory on follower_id = listenhistory.user_id
+                JOIN songs ON listenhistory.song_id = songs.song_id
+                WHERE followee_id = %d
+                GROUP BY song_title
+                ORDER BY count DESC
+                LIMIT 50
+            """, uid);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+            if(rs.next()) {
+                System.out.println("These are the top 50 follower songs: ");
+                do {
+                    System.out.printf("%s\n", rs.getString("song_title"));
+                } while (rs.next());
+                System.out.println("");
+                return true;
+            }
+            else {
+                System.out.println("You have no followers. :(");
+            }
+        } catch (SQLException ex) {}
+        return false;
+    }
 }
