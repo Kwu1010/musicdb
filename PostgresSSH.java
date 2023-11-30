@@ -644,6 +644,40 @@ public class PostgresSSH {
         return true;
     }
 
+    public static boolean collectionNum(int uid) {
+        String sb = String.format("""
+            SELECT COUNT(collections) FROM collections WHERE user_id = %d
+            """, uid);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+        } catch (SQLException ex) {}
+        return false;
+    }
+
+    public static boolean viewFollowed(int uid) {
+        String sb = String.format("""
+            SELECT COUNT(follower_id) FROM followers WHERE followee_id = %d
+            """, uid);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+        } catch (SQLException ex) {}
+        return false;
+    }
+
+    public static boolean viewFollowing(int uid) {
+        String sb = String.format("""
+            SELECT COUNT(followee_id) FROM followers WHERE follower_id = %d
+            """, uid);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+        } catch (SQLException ex) {}
+        return false;
+    }
+
+
     public static boolean topFiveGenres(String month, String year) {
         String sb = String.format("""
                 SELECT type, COUNT(*) as numSongs FROM songs
