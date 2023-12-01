@@ -275,6 +275,7 @@ class Controller {
                         PostgresSSH.topFiveGenres(month, year);
                         break;
                     case 19: // top 50 most popular songs in the last 30 days
+                        PostgresSSH.top50SongsInLast30Days();
                         break;
                     case 20: // 50 most popular songs amongst followers
                         uid = user.get_id();
