@@ -8,10 +8,15 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
 
 import Model.*;
 
@@ -748,63 +753,120 @@ public class PostgresSSH {
         return false;
     }
 
-    public static boolean recommendSongs(int uid){
-        String sb = String.format("""
-            CREATE VIEW SONGIDS AS
-            SELECT song_id FROM LISTENHISTORY WHERE USER_ID = %d
+    // APPROVED
+    public static boolean recommendSongs(int uid) {
+        String sql1 = String.format("""
+            SELECT DISTINCT 
+                SONG_ID AS songtitles 
+            FROM 
+                LISTENHISTORY 
+            WHERE 
+                USER_ID = %d
+        """, uid);
+    
+        try {
+            Statement stmt1 = conn.createStatement();
+            ResultSet rs1 = stmt1.executeQuery(sql1);
+    
+            String listofids = "(";
+            boolean firstIteration = true;
+            while (rs1.next()) {
+                if (!firstIteration) {
+                    listofids += ",";
+                } else {
+                    firstIteration = false;
+                }
+                listofids += rs1.getString("songtitles");
+            }
+            listofids += ")";
 
-            SELECT DISTINCT SONGS.SONG_TITLE AS songtitles
-            FROM SONGS
-            INNER JOIN SONGARTIST ON 
-                SONGARTIST.SONG_ID = SONGS.SONG_ID
-                AND SONGARTIST.ARTIST_ID IN (
-                    SELECT ARTIST_ID
-                    FROM SONGARTIST
-                    WHERE SONG_ID NOT IN (
-                        SELECT song_id
-                        FROM SONGIDS
+            if (listofids.equals("()")) {
+                System.out.println("You haven't listened to any songs yet. I suggest song id: 4242.");
+                return false;
+            }
+    
+            Set<String> sb = new HashSet<>();
+    
+            // Query 1
+            String sql2 = String.format("""
+                SELECT DISTINCT SONG_TITLE AS SONGTITLES, GENRES.TYPE AS TYPES
+                FROM SONGS
+                JOIN SONGGENRE ON SONGGENRE.SONG_ID = SONGS.SONG_ID
+                JOIN GENRES ON GENRES.GENRE_ID = SONGGENRE.GENRE_ID
+                WHERE SONGS.SONG_ID IN %s
+            """, listofids);
+    
+            Statement stmt2 = conn.createStatement();
+            ResultSet rs2 = stmt2.executeQuery(sql2);
+            while (rs2.next()) {
+                sb.add(rs2.getString("SONGTITLES"));
+            }
+    
+            // Query 2
+            String sql3 = String.format("""
+                SELECT DISTINCT SONG_TITLE AS SONGTITLES 
+                FROM SONGS
+                WHERE SONG_ID IN (
+                    SELECT SONG_ID 
+                    FROM SONGALBUM
+                    WHERE ALBUM_ID IN (
+                        SELECT ALBUM_ID 
+                        FROM ALBUMARTIST 
+                        WHERE ALBUMARTIST.ARTIST_ID IN (
+                            SELECT ARTISTS.ARTIST_ID 
+                            FROM ARTISTS 
+                            WHERE ARTISTS.ARTIST_ID IN (
+                                SELECT ARTIST_ID 
+                                FROM SONGARTIST
+                                WHERE SONG_ID IN %s
+                            )
+                        )
                     )
                 )
-            INNER JOIN GENRE ON GENRE.GENRE_ID IN (
-                SELECT GENRE_ID
-                FROM SONGGENRE
-                WHERE SONG_ID NOT IN (
-                    SELECT song_id
-                    FROM SONGIDS
-                )
-            )
-        """, uid);
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sb);
-            if (rs.next()) {
-                System.out.println("Song recommendations based on your listening history: \n");
-                while (rs.next()) {
-                    System.out.printf("%s\n", rs.getString("songtitles"));
-                }
-                return true;
+            """, listofids);
+    
+            Statement stmt3 = conn.createStatement();
+            ResultSet rs3 = stmt3.executeQuery(sql3);
+            while (rs3.next()) {
+                sb.add(rs3.getString("SONGTITLES"));
             }
-        } catch (SQLException ex) {
+    
+            for (String song : sb) {
+                System.out.println(song);
+            }
+        } catch (Exception ex) {
             System.out.println(ex);
+            return false;
         }
-        return false;
+        return true;
     }
 
-    public static boolean top50SongsInLast30Days(){
-        String now = LocalDateTime.now().toString();
+    // APPROVED
+    public static boolean top50SongsInLast30Days() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        Calendar cal = Calendar.getInstance();
+        String currentDate = dateFormat.format(cal.getTime()); // today
+        cal.add(Calendar.DATE, -30);
+        String thirtydaysago = dateFormat.format(cal.getTime()); // 30 days ago
+
         String sb = String.format("""
-                SELECT song_title, COUNT(*) as count
-                FROM listenhistory 
-                WHERE datetime >= %s - INTERVAL 30 day
-                GROUP BY song_title
-                ORDER BY count DESC
-                LIMIT 50
-            """, now);
+            SELECT SONGS.SONG_TITLE as "song_title", count (LISTENHISTORY.SONG_ID) AS MOMMY
+            FROM SONGS
+            JOIN LISTENHISTORY
+            ON 
+            LISTENHISTORY.SONG_ID = SONGS.SONG_ID
+            WHERE DATETIME BETWEEN '%s' AND '%s'
+            GROUP BY SONGS.SONG_TITLE
+            ORDER BY MOMMY DESC
+            LIMIT 50
+        """, thirtydaysago, currentDate);
+
+
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
             if(rs.next()) {
-                System.out.println("These are the top 50 follower songs: ");
+                System.out.println("These are the top 50 songs within the last 30 days: ");
                 do {
                     System.out.printf("%s\n", rs.getString("song_title"));
                 } while (rs.next());
@@ -820,6 +882,7 @@ public class PostgresSSH {
         return false;
     }
 
+    // APPROVED
     public static boolean top50FollowerSongs(int uid) {
         String sb = String.format("""
                 SELECT song_title, COUNT(*) as count
