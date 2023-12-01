@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Properties;
 import java.util.Scanner;
@@ -700,6 +701,34 @@ public class PostgresSSH {
                 } while (rs.next());
                 System.out.println("");
                 return true;
+            }
+        } catch (SQLException ex) {}
+        return false;
+    }
+
+    public static boolean top50SongsInLast30Days(){
+        String now = LocalDateTime.now().toString();
+        String sb = String.format("""
+                SELECT song_title, COUNT(*) as count
+                FROM listenhistory 
+                WHERE datetime >= %s - INTERVAL 30 day
+                GROUP BY song_title
+                ORDER BY count DESC
+                LIMIT 50
+            """, now);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+            if(rs.next()) {
+                System.out.println("These are the top 50 follower songs: ");
+                do {
+                    System.out.printf("%s\n", rs.getString("song_title"));
+                } while (rs.next());
+                System.out.println("");
+                return true;
+            }
+            else {
+                System.out.println("You haven't listened to any songs");
             }
         } catch (SQLException ex) {}
         return false;
