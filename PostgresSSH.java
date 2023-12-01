@@ -645,6 +645,7 @@ public class PostgresSSH {
         return true;
     }
 
+    // APPROVED
     public static boolean collectionNum(int uid) {
         String sb = String.format("""
             SELECT COUNT(collections) FROM collections WHERE user_id = %d
@@ -652,10 +653,15 @@ public class PostgresSSH {
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
-        } catch (SQLException ex) {}
+            rs.next();
+            System.out.printf("# of Collections: %d\n", rs.getInt(1));
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
         return false;
     }
 
+    // APPROVED
     public static boolean viewFollowed(int uid) {
         String sb = String.format("""
             SELECT COUNT(follower_id) FROM followers WHERE followee_id = %d
@@ -663,10 +669,13 @@ public class PostgresSSH {
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
+            rs.next();
+            System.out.printf("Followers: %d\n", rs.getInt(1));
         } catch (SQLException ex) {}
         return false;
     }
 
+    // APPROVED
     public static boolean viewFollowing(int uid) {
         String sb = String.format("""
             SELECT COUNT(followee_id) FROM followers WHERE follower_id = %d
@@ -674,23 +683,44 @@ public class PostgresSSH {
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
+            rs.next();
+            System.out.printf("Following: %d\n", rs.getInt(1));
         } catch (SQLException ex) {}
         return false;
     }
 
-    public static boolean top_ten_artists(int uid) {
+    // APPROVED
+    public static boolean topTenArtists(int uid) {
         String sql = String.format("""
-            SELECT USER.USER_ID as UID, ARTIST_NAME, ARTIST_ID FROM ARTISTS
-            JOIN SONGARTISTS ON SONGARTISTS.ARTIST_ID = ARTIST_ID
-            JOIN LISTENHISTORY ON LISTENHISTORY.ARTIST_ID = ARTIST_ID AND LISTENHISTORY.USER_ID = %d
+            SELECT ARTISTS.ARTIST_NAME, COUNT(*) as numSongs FROM LISTENHISTORY
+            INNER JOIN SONGS ON LISTENHISTORY.SONG_ID = SONGS.SONG_ID
+            INNER JOIN SONGARTIST ON SONGS.SONG_ID = SONGARTIST.SONG_ID
+            INNER JOIN ARTISTS ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
+            WHERE LISTENHISTORY.USER_ID = %d
+            GROUP BY ARTISTS.ARTIST_NAME
+            ORDER BY numSongs DESC
+            LIMIT 10
         """, uid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-        } catch (Exception ex) {}
+            if (rs.next()) {
+                System.out.println("Top 10 artists listened to by user " + uid);
+                do {
+                    System.out.printf("%s\n", rs.getString("ARTIST_NAME"));
+                } while (rs.next());
+                System.out.println("");
+                return true;
+            } else {
+                System.out.println("You haven't listened to a single song yet. I suggest song id 4242.");
+            }
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
         return false;
     }
 
+    // APPROVED
     public static boolean topFiveGenres(String month, String year) {
         String sb = String.format("""
                 SELECT type, COUNT(*) as numSongs FROM songs
@@ -754,7 +784,9 @@ public class PostgresSSH {
                 }
                 return true;
             }
-        } catch (SQLException ex) {}
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
         return false;
     }
 
@@ -782,7 +814,9 @@ public class PostgresSSH {
             else {
                 System.out.println("You haven't listened to any songs");
             }
-        } catch (SQLException ex) {}
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
         return false;
     }
 

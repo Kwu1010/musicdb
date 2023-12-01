@@ -29,8 +29,9 @@ class Controller {
         System.out.println("\t16. Unfollow User");
         System.out.println("\t17. See profile");
         System.out.println("\t18. View top 5 genres this month");
-        System.out.println("\t19. View top 50 most popular songs this month");
+        System.out.println("\t19. View top 50 most popular songs in the past 30 days");
         System.out.println("\t20. View top 50 most popular songs among my followers");
+        System.out.println("\t21. Recommend a song based on your history");
     }
 
     private static String ask(String var_name) {
@@ -266,7 +267,7 @@ class Controller {
                         PostgresSSH.collectionNum(uid);
                         PostgresSSH.viewFollowed(uid);
                         PostgresSSH.viewFollowing(uid);
-                        // PostgresSSH.top_ten_artists(uid);
+                        PostgresSSH.topTenArtists(uid);
                         break;
                     case 18: // See top 5 popular genres of the calendar month
                         LocalDateTime now = LocalDateTime.now();
@@ -280,6 +281,10 @@ class Controller {
                     case 20: // 50 most popular songs amongst followers
                         uid = user.get_id();
                         PostgresSSH.top50FollowerSongs(uid);
+                        break;
+                    case 21:
+                        uid = user.get_id();
+                        PostgresSSH.recommendSongs(uid);
                         break;
                     default:
                         System.out.println("No such operation. Please select your desired operation.");
