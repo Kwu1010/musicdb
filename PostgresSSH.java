@@ -850,14 +850,14 @@ public class PostgresSSH {
         String thirtydaysago = dateFormat.format(cal.getTime()); // 30 days ago
 
         String sb = String.format("""
-            SELECT SONGS.SONG_TITLE as "song_title", count (LISTENHISTORY.SONG_ID) AS MOMMY
+            SELECT SONGS.SONG_TITLE as "song_title", count (LISTENHISTORY.SONG_ID) AS "number_of_listens"
             FROM SONGS
             JOIN LISTENHISTORY
             ON 
             LISTENHISTORY.SONG_ID = SONGS.SONG_ID
             WHERE DATETIME BETWEEN '%s' AND '%s'
             GROUP BY SONGS.SONG_TITLE
-            ORDER BY MOMMY DESC
+            ORDER BY number_of_listens DESC
             LIMIT 50
         """, thirtydaysago, currentDate);
 
