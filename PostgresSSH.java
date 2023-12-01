@@ -269,20 +269,20 @@ public class PostgresSSH {
     public static boolean searchSongArtist(Artist artist) {
         String aname = artist.get_artist();
         String sql = String.format("""
-                    SELECT
-                        SONGS.SONG_ID as "song_id",
-                        ARTISTS.ARTIST_NAME,
-                        SONGS.SONG_TITLE as "song_title",
-                        ALBUMS.ALBUM_NAME,
-                        SONGS.SONG_LENGTH,
-                        SONGS.RELEASE_DATE
-                    FROM ARTISTS
-                    JOIN SONGARTIST ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
-                    JOIN SONGS ON SONGS.SONG_ID = SONGARTIST.SONG_ID
-                    JOIN ALBUMARTIST ON ALBUMARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
-                    JOIN ALBUMS ON ALBUMS.ALBUM_ID = ALBUMARTIST.ALBUM_ID
-                    WHERE ARTISTS.ARTIST_NAME = '%s'
-                """, aname);
+            SELECT
+                SONGS.SONG_ID as "song_id",
+                ARTISTS.ARTIST_NAME,
+                SONGS.SONG_TITLE as "song_title",
+                ALBUMS.ALBUM_NAME,
+                SONGS.SONG_LENGTH,
+                SONGS.RELEASE_DATE
+            FROM ARTISTS
+            JOIN SONGARTIST ON SONGARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
+            JOIN SONGS ON SONGS.SONG_ID = SONGARTIST.SONG_ID
+            JOIN ALBUMARTIST ON ALBUMARTIST.ARTIST_ID = ARTISTS.ARTIST_ID
+            JOIN ALBUMS ON ALBUMS.ALBUM_ID = ALBUMARTIST.ALBUM_ID
+            WHERE ARTISTS.ARTIST_NAME = '%s'
+        """, aname);
 
         try {
             Statement stmt = conn.createStatement();
@@ -617,9 +617,9 @@ public class PostgresSSH {
         LocalDateTime now = LocalDateTime.now();
 
         String sb = String.format("""
-                    INSERT INTO LISTENHISTORY (USER_ID, SONG_ID, DATETIME) VALUES
-                    (%d, %d, '%s')
-                """, uid, sid, now);
+            INSERT INTO LISTENHISTORY (USER_ID, SONG_ID, DATETIME) VALUES
+            (%d, %d, '%s')
+        """, uid, sid, now);
 
         try {
             Statement stmt = conn.createStatement();
@@ -648,7 +648,7 @@ public class PostgresSSH {
     public static boolean collectionNum(int uid) {
         String sb = String.format("""
             SELECT COUNT(collections) FROM collections WHERE user_id = %d
-            """, uid);
+        """, uid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
@@ -659,7 +659,7 @@ public class PostgresSSH {
     public static boolean viewFollowed(int uid) {
         String sb = String.format("""
             SELECT COUNT(follower_id) FROM followers WHERE followee_id = %d
-            """, uid);
+        """, uid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
@@ -670,7 +670,7 @@ public class PostgresSSH {
     public static boolean viewFollowing(int uid) {
         String sb = String.format("""
             SELECT COUNT(followee_id) FROM followers WHERE follower_id = %d
-            """, uid);
+        """, uid);
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sb);
@@ -678,6 +678,18 @@ public class PostgresSSH {
         return false;
     }
 
+    public static boolean top_ten_artists(int uid) {
+        String sql = String.format("""
+            SELECT USER.USER_ID as UID, ARTIST_NAME, ARTIST_ID FROM ARTISTS
+            JOIN SONGARTISTS ON SONGARTISTS.ARTIST_ID = ARTIST_ID
+            JOIN LISTENHISTORY ON LISTENHISTORY.ARTIST_ID = ARTIST_ID AND LISTENHISTORY.USER_ID = %d
+        """, uid);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+        } catch (Exception ex) {}
+        return false;
+    }
 
     public static boolean topFiveGenres(String month, String year) {
         String sb = String.format("""
@@ -700,6 +712,46 @@ public class PostgresSSH {
                     System.out.printf("%s\n", rs.getString("type"));
                 } while (rs.next());
                 System.out.println("");
+                return true;
+            }
+        } catch (SQLException ex) {}
+        return false;
+    }
+
+    public static boolean recommendSongs(int uid){
+        String sb = String.format("""
+            CREATE VIEW SONGIDS AS
+            SELECT song_id FROM LISTENHISTORY WHERE USER_ID = %d
+
+            SELECT DISTINCT SONGS.SONG_TITLE AS songtitles
+            FROM SONGS
+            INNER JOIN SONGARTIST ON 
+                SONGARTIST.SONG_ID = SONGS.SONG_ID
+                AND SONGARTIST.ARTIST_ID IN (
+                    SELECT ARTIST_ID
+                    FROM SONGARTIST
+                    WHERE SONG_ID NOT IN (
+                        SELECT song_id
+                        FROM SONGIDS
+                    )
+                )
+            INNER JOIN GENRE ON GENRE.GENRE_ID IN (
+                SELECT GENRE_ID
+                FROM SONGGENRE
+                WHERE SONG_ID NOT IN (
+                    SELECT song_id
+                    FROM SONGIDS
+                )
+            )
+        """, uid);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sb);
+            if (rs.next()) {
+                System.out.println("Song recommendations based on your listening history: \n");
+                while (rs.next()) {
+                    System.out.printf("%s\n", rs.getString("songtitles"));
+                }
                 return true;
             }
         } catch (SQLException ex) {}
